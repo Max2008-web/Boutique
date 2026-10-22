@@ -8,6 +8,7 @@ REPO_URL="${REPO_URL:-https://github.com/Max2008-web/Boutique.git}"
 BRANCH="${BRANCH:-ccr-4d7b60f1-vuvg52}"
 INSTALL_DIR="${INSTALL_DIR:-$HOME/Boutique}"
 BOT_DIR="$INSTALL_DIR/kraken_bot"
+RUN_USER="$(id -un)"
 
 echo "==> Installation des paquets système"
 sudo apt-get update -y -qq
@@ -44,7 +45,7 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=$USER
+User=$RUN_USER
 WorkingDirectory=$BOT_DIR
 ExecStart=$BOT_DIR/.venv/bin/python bot.py
 Restart=on-failure
