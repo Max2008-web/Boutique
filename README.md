@@ -61,3 +61,10 @@ et adaptez la signature (handler + event/context). Variable d'environnement
 
 La clé API n'est **jamais** exposée au navigateur : elle vit uniquement côté
 serveur dans la fonction `api/generate.js`. Ne committez jamais votre `.env`.
+
+---
+
+## Autre projet : site du restaurant « Maison Aurèle »
+
+Le dossier [`restaurant/`](restaurant/README.md) contient un site de restaurant gastronomique
+(React + Vite + Tailwind, réservation en ligne) et le lien vers sa maquette Figma.
