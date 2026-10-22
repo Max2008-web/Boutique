@@ -366,13 +366,13 @@ def main() -> int:
 
     cfg = load_config()
     setup_logging(cfg)
-    if args.status:
-        print_status(cfg)
-        return 0
     if args.reset_halt:
         risk = RiskEngine(cfg, cfg.state_file)
         log.warning("Réarmement manuel du hard stop (ancien motif : %s)", risk.halt_reason or "aucun")
         risk.reset_halt()
+    if args.status:
+        print_status(cfg)
+        return 0
     if not cfg.dry_run:
         log.warning("MODE LIVE : des ordres réels vont être envoyés sur Kraken.")
     return TradingBot(cfg).run()
