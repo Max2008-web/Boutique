@@ -44,7 +44,7 @@ TRADING_TIERS: Dict[str, Tuple[float, float]] = {
 REST_COSTS: Dict[str, float] = {
     "fetch_balance": 1, "fetch_open_orders": 1, "fetch_closed_orders": 1,
     "fetch_order": 1, "fetch_orders": 1, "fetch_my_trades": 2, "fetch_ledger": 2,
-    "fetch_trading_fees": 1, "create_order": 0, "cancel_order": 0,
+    "fetch_trading_fees": 1, "fetch_trading_fee": 1, "create_order": 0, "cancel_order": 0,
     "cancel_all_orders": 0, "edit_order": 0,
 }
 TIMEFRAME_MS = {"1m": 60_000, "5m": 300_000, "15m": 900_000, "30m": 1_800_000,

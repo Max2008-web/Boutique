@@ -53,9 +53,11 @@ kraken_bot/
 ├── execution.py       # post-only, repricing, idempotence userref, retries, stops Kraken, broker papier
 ├── backtester.py      # backtest portefeuille avec frais maker/taker par palier
 ├── bot.py             # orchestrateur live / paper
+├── check_setup.py     # vérification de l'intégration Kraken avant le live (aucun ordre envoyé)
 ├── kraken-bot.service # unité systemd pour VPS
 ├── requirements.txt
-└── .env.example
+├── .env.example
+└── .env.petit-capital.example  # profil prêt à l'emploi pour démarrer avec ~50 €
 ```
 
 ### Spécificités Kraken prises en charge
@@ -123,9 +125,10 @@ python bot.py --status   # état : positions, PnL, drawdown, risque courant
 Laissez tourner au moins 2 à 4 semaines.
 
 ### 3.6 Passage en live
-1. Dans `.env` : `DRY_RUN=false` et `STATE_FILE=bot_state_live.json`. Un fichier d'état distinct est obligatoire, et le bot refuse de mélanger simulation et live.
-2. Commencez avec un petit capital en USD sur le compte.
-3. Lancez `python bot.py`, puis surveillez `tail -f bot.log`.
+1. Lancez `python check_setup.py`. Il vérifie la connexion, l'horloge, les permissions de la clé, les soldes, les frais réels du compte, la faisabilité des trades avec votre capital et le WebSocket. Il n'envoie **aucun** ordre : le droit de trading est testé avec un ordre en mode `validate`, que Kraken contrôle sans l'exécuter. Corrigez chaque `[ÉCHEC]` avant d'aller plus loin.
+2. Dans `.env` : `DRY_RUN=false` et `STATE_FILE=bot_state_live.json`. Un fichier d'état distinct est obligatoire, et le bot refuse de mélanger simulation et live.
+3. Commencez avec un petit capital sur le compte.
+4. Lancez `python bot.py`, puis surveillez `tail -f bot.log`.
 
 ### 3.7 Faire tourner 24/7 sur un VPS (systemd)
 ```bash
@@ -153,3 +156,33 @@ Alternative sans systemd : `tmux new -s bot`, puis `python bot.py`, puis `Ctrl+B
 - Le backtest suppose une exécution maker quand la bougie suivante traverse strictement le prix limite. La réalité (file d'attente du carnet) peut être moins favorable : prévoyez une marge.
 - L'API OHLC de Kraken ne renvoie que 720 bougies. Pour un historique fiable, utilisez `--source trades` ou les archives CSV.
 - Spot uniquement, positions longues seulement : pas de vente à découvert ni de levier, ce qui supprime le risque de liquidation.
+
+---
+
+## 5. Démarrer avec 50 €
+
+### Ce que 50 € permettent (et ne permettent pas)
+- **Techniquement, ça passe.** Avec 2 % de risque, chaque trade risque environ 1 €. Selon la volatilité, la position fait 15 à 45 €, au-dessus des minimums Kraken (environ 0,00005 BTC, soit quelques euros). `check_setup.py` fait le calcul exact avec les prix du jour.
+- **Les frais pèsent lourd en proportion.** Un aller-retour sur une position de 30 € coûte environ 0,15 à 0,25 €, soit 15 à 25 % du risque de 1 €. Chaque trade démarre donc avec environ −0,2R. C'est pour ça que le profil utilise du 1h (stops plus larges, moins de trades) et des ordres post-only.
+- **Les gains en euros resteront petits.** Même une excellente année à +30 % ferait 15 €. Avec 50 €, le vrai objectif est de valider le système en conditions réelles (exécutions maker, stops, frais, stabilité) avant d'y mettre plus d'argent. Ce n'est pas un revenu.
+
+### Le plan, étape par étape
+1. **Aujourd'hui, 0 € engagé.** Copiez le profil (`cp .env.petit-capital.example .env`), puis lancez `python backtester.py --source ohlc --timeframe 1h` et `python bot.py` en simulation. Laissez tourner 2 à 4 semaines sur votre ordinateur.
+2. **Compte Kraken.** Inscription et vérification d'identité, nécessaire pour déposer des euros. Faites un dépôt de 50 € par virement SEPA, et vérifiez sur la page de dépôt de Kraken les frais et le minimum en vigueur.
+3. **Clé API.** Créez une clé dédiée au bot, avec les permissions de la section 3.3 et sans *Withdraw Funds*, puis collez-la dans `.env`. Ne la partagez jamais, y compris dans une conversation avec une IA.
+4. **Vérification.** Lancez `python check_setup.py` et attendez zéro `[ÉCHEC]`.
+5. **Live.** Passez à `DRY_RUN=false` et `STATE_FILE=bot_state_live.json`, puis `python bot.py`. Contrôlez chaque trade dans l'historique Kraken pendant les premières semaines.
+6. **Bilan après 2 à 3 mois.** N'augmentez le capital que si les résultats live ressemblent au backtest : taux de réussite, R moyen, frais réels.
+
+### Où faire tourner le bot sans manger le capital
+| Option | Coût | Verdict pour 50 € |
+|---|---|---|
+| Votre ordinateur, allumé en continu (veille désactivée) | 0 € | ✅ Idéal pour commencer. Le stop-loss posé chez Kraken protège la position si le PC s'éteint. |
+| Offre cloud gratuite (ex. VM « Always Free » d'Oracle Cloud, région Paris ou Francfort) | 0 € (conditions à vérifier chez l'hébergeur) | ✅ Le meilleur choix pour du 24/7. Suivez la section 3.7 (systemd). |
+| VPS payant (environ 4 à 6 €/mois) | 50 à 70 €/an | ❌ Coûterait plus que le capital chaque année. À envisager à partir d'environ 1 000 à 2 000 €. |
+| Raspberry Pi | 60 à 100 € une fois | ⚠️ Plus cher que le capital de départ. |
+
+### Fiscalité (résident fiscal français)
+- Un compte ouvert sur une plateforme étrangère comme Kraken se déclare chaque année avec les revenus (formulaire 3916-bis).
+- Les ventes de crypto contre des euros sont imposables : chaque sortie de position BTC/EUR en est une.
+- Le bot enregistre tous les trades dans le fichier d'état, et Kraken permet d'exporter l'historique pour la déclaration. Vérifiez les règles en vigueur sur impots.gouv.fr.

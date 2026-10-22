@@ -64,8 +64,8 @@ class TradingBot:
         held = {s: p.amount for s, p in self.risk.positions.items()}
         return self.exec.equity(held, prices)
 
-    def fees(self):
-        return self.exec.current_fees(self.risk.rolling_volume(self.now()))
+    def fees(self, symbol: str = None):
+        return self.exec.current_fees(self.risk.rolling_volume(self.now()), symbol)
 
     def stop(self, *_):
         log.info("Signal d'arrêt reçu, fin de la boucle après l'itération en cours")
@@ -83,7 +83,7 @@ class TradingBot:
         self.reconcile(force=True)
         prices = self.prices()
         self.risk.initialize(self.equity(prices))
-        maker, taker = self.fees()
+        maker, taker = self.fees(self.symbols[0])
         log.info("Frais du palier courant : maker %.2f%% / taker %.2f%%", maker * 100, taker * 100)
         self.feed.start_ws()
         # bougies déjà clôturées au démarrage : on met à jour les stops sans ouvrir de position
@@ -211,7 +211,7 @@ class TradingBot:
         if len(self.risk.positions) >= self.cfg.max_open_positions:
             log.info("%s : signal ignoré, %d positions déjà ouvertes", symbol, len(self.risk.positions))
             return
-        maker, taker = self.fees()
+        maker, taker = self.fees(symbol)
         entry_ref = self.feed.ticker(symbol)["ask"]
         stop = entry_ref - self.cfg.initial_stop_atr * sig.atr
         equity = self.equity(self.prices())
@@ -245,7 +245,7 @@ class TradingBot:
                  symbol, fill.filled, avg, 100 * fill.maker_filled / fill.filled, fill.fee, stop)
 
     def add_to_position(self, symbol: str, pos: Position, sig: Signal) -> None:
-        maker, taker = self.fees()
+        maker, taker = self.fees(symbol)
         entry_ref = self.feed.ticker(symbol)["ask"]
         equity = self.equity(self.prices())
         free_quote = self.exec.free(self.cfg.quote_currency)

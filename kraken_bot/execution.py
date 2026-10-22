@@ -155,6 +155,7 @@ class ExecutionEngine:
         self._placed_at: Dict[str, float] = {}
         self._balance_cache: Optional[dict] = None
         self._balance_ts = 0.0
+        self._fee_cache: Dict[str, tuple] = {}
 
     # ------------------------------------------------------------- soldes
     def fetch_balance(self, max_age: float = 5.0) -> dict:
@@ -185,8 +186,21 @@ class ExecutionEngine:
             eq += amount * prices.get(symbol, 0.0)
         return eq
 
-    def current_fees(self, volume_30d: float):
-        return fee_for_volume(volume_30d)
+    def current_fees(self, volume_30d: float, symbol: Optional[str] = None):
+        """(maker, taker) : barème réel du compte Kraken en live (cache 1 h), grille publique sinon."""
+        if self.paper or symbol is None:
+            return fee_for_volume(volume_30d)
+        cached = self._fee_cache.get(symbol)
+        if cached and time.time() - cached[2] < 3600:
+            return cached[0], cached[1]
+        try:
+            fee = self.feed.private("fetch_trading_fee", symbol, retries=2)
+            maker, taker = float(fee["maker"]), float(fee["taker"])
+            self._fee_cache[symbol] = (maker, taker, time.time())
+            return maker, taker
+        except Exception as exc:
+            log.warning("Frais réels %s indisponibles (%s), grille publique utilisée", symbol, exc)
+            return fee_for_volume(volume_30d)
 
     # ----------------------------------------------------- primitives live
     def _new_userref(self) -> int:
