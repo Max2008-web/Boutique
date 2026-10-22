@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @layer base {
-  html { scroll-behavior: smooth; scroll-padding-top: 88px; }
+  html { color-scheme: dark; background: #0B0A09; scroll-behavior: smooth; scroll-padding-top: 88px; }
   body { @apply bg-bg-base text-ink-primary font-sans antialiased; }
   ::selection { @apply bg-brass-500 text-ink-inverse; }
   :focus-visible { @apply outline outline-1 outline-offset-4 outline-brass-500; }

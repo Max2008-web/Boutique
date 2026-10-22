@@ -30,7 +30,7 @@ export default function Nav() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-40 transition-all duration-500 ease-lux ${
+      className={`fixed inset-x-0 top-0 z-40 pt-[env(safe-area-inset-top)] transition-all duration-500 ease-lux ${
         scrolled ? 'border-b border-line-subtle bg-bg-base/90 backdrop-blur-md' : 'border-b border-ink-primary/10 bg-transparent'
       }`}
     >

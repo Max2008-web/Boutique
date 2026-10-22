@@ -46,7 +46,7 @@ export function Photo({ name, alt, className = '', imgClassName = '', eager = fa
   return (
     <div className={`relative overflow-hidden bg-bg-surface ${className}`}>
       <img
-        src={`/images/lqip/${name}.jpg`}
+        src={`${import.meta.env.BASE_URL}images/lqip/${name}.jpg`}
         alt=""
         aria-hidden="true"
         className={`absolute inset-0 h-full w-full scale-105 object-cover transition-opacity duration-700 ${
@@ -54,7 +54,7 @@ export function Photo({ name, alt, className = '', imgClassName = '', eager = fa
         } ${state === 'fallback' ? 'blur-[1px]' : 'blur-lg'}`}
       />
       <img
-        src={`/images/${name}.jpg`}
+        src={`${import.meta.env.BASE_URL}images/${name}.jpg`}
         alt={alt}
         loading={eager ? 'eager' : 'lazy'}
         decoding="async"

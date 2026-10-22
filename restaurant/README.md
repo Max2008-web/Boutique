@@ -14,7 +14,7 @@ carte à onglets, galerie bento avec visionneuse, module de réservation et foot
 ```bash
 cd restaurant
 npm install
-npm run images   # récupère les photos HD (voir « Photos » ci-dessous)
+
 npm run dev      # http://localhost:5173
 npm test         # tests de la logique de réservation
 ```
@@ -49,11 +49,9 @@ restaurant/
 
 ## Photos
 
-Les visuels ont été générés avec Figma AI dans le fichier de design (calques `photo/*`
-de la page Foundations). `npm run images` les télécharge dans `public/images/` ; les
-liens expirent **7 jours** après la génération. Ensuite, exportez les calques en JPG
-depuis Figma sous les noms `hero`, `chef`, `salle`, `plat`, `cave` et `dessert`.
-Sans les fichiers HD, le site affiche les aperçus de `public/images/lqip/`.
+Les six visuels HD ont été générés avec Figma AI dans le fichier de design (calques `photo/*`
+de la page Foundations) et sont inclus dans `public/images/`. `public/images/lqip/` contient
+les aperçus flous affichés pendant le chargement.
 
 ## Déploiement
 
