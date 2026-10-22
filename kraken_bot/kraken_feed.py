@@ -319,7 +319,20 @@ class KrakenFeed:
                           max_retries=self.cfg.max_retries)
         call_with_retries(self.exchange.load_markets, label="markets",
                           max_retries=self.cfg.max_retries)
-        self.symbols = [self.resolve_symbol(s) for s in self.cfg.symbols]
+        self.symbols = []
+        for raw in self.cfg.symbols:
+            try:
+                symbol = self.resolve_symbol(raw)
+            except ValueError:
+                log.warning("Paire %s introuvable chez Kraken : ignorée", raw)
+                continue
+            if self.exchange.market(symbol).get("active") is False:
+                log.warning("Paire %s suspendue chez Kraken : ignorée", symbol)
+                continue
+            if symbol not in self.symbols:
+                self.symbols.append(symbol)
+        if not self.symbols:
+            raise ValueError("Aucune des paires configurées (SYMBOLS) n'existe chez Kraken")
         for s in self.symbols:
             m = self.exchange.market(s)
             log.info("Marché %s -> id Kraken %s (altname %s, ordermin %s, costmin %s)",

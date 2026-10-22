@@ -217,7 +217,12 @@ class RiskEngine:
             return 0.0, 0.0
         # risque par unité : distance au stop + frais d'entrée et de sortie
         per_unit = (entry_price - stop_price) + entry_price * fee_rate + stop_price * fee_rate
-        amount = risk_budget / per_unit
+        if self.cfg.fixed_stake > 0:
+            # mise fixe, mais la perte au stop reste plafonnée à MAX_RISK_PER_TRADE
+            risk_cap = min(basis * self.cfg.max_risk_per_trade * risk_scale, remaining)
+            amount = min(self.cfg.fixed_stake * risk_scale / entry_price, risk_cap / per_unit)
+        else:
+            amount = risk_budget / per_unit
         max_notional = min(free_quote / (1 + fee_rate) * 0.995, basis * self.cfg.max_position_pct)
         amount = min(amount, max(0.0, max_notional) / entry_price)
         return amount, amount * per_unit

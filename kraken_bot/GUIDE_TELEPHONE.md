@@ -90,6 +90,8 @@ Le bot tourne. Tu peux fermer Termius et éteindre ton téléphone : le serveur 
 | `kraken config` | Change les clés ou le mode réel / simulation |
 | `kraken reset` | Réarme le bot après un arrêt d'urgence |
 | `kraken update` | Installe la dernière version du bot |
+| `kraken profil explosif` | Mises fixes de 5 €, jusqu'à 8 paris sur 13 cryptos volatiles, trailing large |
+| `kraken profil petit-capital` | Retour au profil prudent (1 position, BTC/ETH/SOL) |
 
 Tu peux aussi suivre tous les ordres et trades du bot dans ton appli Kraken habituelle.
 

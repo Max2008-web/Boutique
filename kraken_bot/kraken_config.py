@@ -122,6 +122,7 @@ class BotConfig:
     # --- Risque ------------------------------------------------------------
     sizing_mode: str = "fixed"              # fixed | kelly
     risk_per_trade: float = 0.02            # 2 % du capital risqué par trade
+    fixed_stake: float = 0.0                # >0 : mise fixe par trade en devise de cotation (ex. 5 €)
     max_risk_per_trade: float = 0.03        # plafond absolu 3 %
     kelly_fraction: float = 0.5             # demi-Kelly
     kelly_lookback: int = 50
@@ -191,6 +192,7 @@ class BotConfig:
             stop_update_min_atr=_env_float("STOP_UPDATE_MIN_ATR", d.stop_update_min_atr),
             sizing_mode=_env_str("SIZING_MODE", d.sizing_mode).lower(),
             risk_per_trade=_env_float("RISK_PER_TRADE", d.risk_per_trade),
+            fixed_stake=_env_float("FIXED_STAKE", d.fixed_stake),
             max_risk_per_trade=_env_float("MAX_RISK_PER_TRADE", d.max_risk_per_trade),
             kelly_fraction=_env_float("KELLY_FRACTION", d.kelly_fraction),
             kelly_lookback=_env_int("KELLY_LOOKBACK", d.kelly_lookback),
@@ -235,6 +237,8 @@ class BotConfig:
             errors.append("RISK_PER_TRADE doit être > 0 et <= MAX_RISK_PER_TRADE")
         if self.max_risk_per_trade > 0.03:
             errors.append("MAX_RISK_PER_TRADE est plafonné à 3 % (garde-fou anti-ruine)")
+        if self.fixed_stake < 0:
+            errors.append("FIXED_STAKE doit être >= 0 (0 = taille calculée sur le risque)")
         if self.sizing_mode not in ("fixed", "kelly"):
             errors.append("SIZING_MODE doit valoir fixed ou kelly")
         if not 0 < self.kelly_fraction <= 1:

@@ -18,6 +18,7 @@ Utilisation : kraken <commande>
   logs      suivre l'activité en direct (Ctrl+C pour quitter)
   reset     réarmer le bot après un arrêt d'urgence (drawdown)
   update    installer la dernière version du bot
+  profil X  changer de profil : petit-capital ou explosif (garde tes clés)
 EOF
 }
 
@@ -63,8 +64,41 @@ PYEOF
   fi
 }
 
+profil() {
+  src=".env.${1:-}.example"
+  if [ ! -f "$src" ]; then
+    echo "Profils disponibles : petit-capital, explosif"
+    exit 1
+  fi
+  SRC="$src" "$PY" - <<'PYEOF'
+import os, pathlib
+keep = ("API_KEY", "SECRET_KEY", "DRY_RUN", "STATE_FILE")
+old = {}
+env = pathlib.Path(".env")
+if env.exists():
+    for line in env.read_text(encoding="utf-8").splitlines():
+        if "=" in line and not line.lstrip().startswith("#"):
+            k, v = line.split("=", 1)
+            if k.strip() in keep:
+                old[k.strip()] = v.strip()
+lines = []
+for line in pathlib.Path(os.environ["SRC"]).read_text(encoding="utf-8").splitlines():
+    k = line.split("=", 1)[0].strip()
+    if k in old and not line.lstrip().startswith("#"):
+        line = f"{k}={old[k]}"
+    lines.append(line)
+env.write_text("\n".join(lines) + "\n", encoding="utf-8")
+os.chmod(env, 0o600)
+PYEOF
+  echo "Profil '$1' activé (clés et mode conservés)."
+  if systemctl is-active -q kraken-bot 2>/dev/null; then
+    sudo systemctl restart kraken-bot && echo "Bot redémarré avec le nouveau profil."
+  fi
+}
+
 case "${1:-}" in
   config)  config ;;
+  profil)  profil "${2:-}" ;;
   check)   "$PY" check_setup.py ;;
   start)   sudo systemctl start kraken-bot && echo "Bot démarré. Suis-le avec : kraken logs" ;;
   stop)    sudo systemctl stop kraken-bot && echo "Bot arrêté." ;;

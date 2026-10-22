@@ -191,7 +191,7 @@ class Backtester:
         amount, _ = self.risk.size_position(equity, self.cash, price, stop,
                                             taker_fee if self.cfg.taker_fallback else maker_fee,
                                             risk_scale=order.risk_scale)
-        if amount * price < 10.0:   # ~ minimum de coût Kraken
+        if amount * price < 1.0:   # ~ minimum de coût Kraken (souvent 0,5 €)
             return
         cost = amount * price
         fee = cost * fee_rate

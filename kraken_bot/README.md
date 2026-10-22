@@ -57,7 +57,8 @@ kraken_bot/
 ├── kraken-bot.service # unité systemd pour VPS
 ├── requirements.txt
 ├── .env.example
-└── .env.petit-capital.example  # profil prêt à l'emploi pour démarrer avec ~50 €
+├── .env.petit-capital.example  # profil prêt à l'emploi pour démarrer avec ~50 €
+└── .env.explosif.example       # mises fixes (FIXED_STAKE), beaucoup de paires volatiles, trailing large
 ```
 
 ### Spécificités Kraken prises en charge
