@@ -1,0 +1,21 @@
+# Service systemd : copier dans /etc/systemd/system/kraken-bot.service
+# puis : sudo systemctl daemon-reload && sudo systemctl enable --now kraken-bot
+[Unit]
+Description=Kraken momentum breakout bot
+After=network-online.target time-sync.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=trader
+WorkingDirectory=/home/trader/kraken_bot
+ExecStart=/home/trader/kraken_bot/.venv/bin/python bot.py
+# code 2 = hard stop (drawdown) : on NE redémarre PAS automatiquement
+Restart=on-failure
+RestartPreventExitStatus=2
+RestartSec=30
+KillSignal=SIGTERM
+TimeoutStopSec=60
+
+[Install]
+WantedBy=multi-user.target
