@@ -61,3 +61,9 @@ et adaptez la signature (handler + event/context). Variable d'environnement
 
 La clé API n'est **jamais** exposée au navigateur : elle vit uniquement côté
 serveur dans la fonction `api/generate.js`. Ne committez jamais votre `.env`.
+
+---
+
+## Pump Terminal (trading Solana)
+
+Le dossier [`pump-terminal/`](pump-terminal/README.md) contient un terminal de trading Pump.fun / PumpSwap distinct de ce générateur de devis : connexion Phantom, analyse Grok, automatisations. Consultez son README pour l'installation et le déploiement.

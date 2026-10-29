@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  background: #08090c;
+  color: #e6e8eb;
+  -webkit-tap-highlight-color: transparent;
+}
+body {
+  font-feature-settings: "tnum" 1;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2a303a transparent;
+}
+select option {
+  background: #151920;
+}
+
+/* Bouton Phantom / wallet-adapter aux couleurs du terminal */
+.wallet-adapter-button {
+  height: 36px !important;
+  padding: 0 14px !important;
+  font-size: 13px !important;
+  font-family: Inter, system-ui, sans-serif !important;
+  border-radius: 10px !important;
+  background: #7c5cff !important;
+}
+.wallet-adapter-button:not([disabled]):hover {
+  background: #6a49f5 !important;
+}
+.wallet-adapter-button-start-icon {
+  width: 18px !important;
+  height: 18px !important;
+  margin-right: 8px !important;
+}
+.wallet-adapter-modal-wrapper {
+  background: #0f1217 !important;
+}
+@media (max-width: 640px) {
+  .wallet-adapter-button {
+    padding: 0 10px !important;
+    font-size: 12px !important;
+  }
+}

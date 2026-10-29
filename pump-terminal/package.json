@@ -1,0 +1,13 @@
+{
+  "name": "pump-terminal",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Terminal de trading Pump.fun / PumpSwap connecté à Phantom, avec analyse Grok et automatisations sous validation.",
+  "scripts": {
+    "install:all": "npm --prefix server install && npm --prefix client install",
+    "build": "npm --prefix client run build && npm --prefix server run build",
+    "start": "npm --prefix server start",
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev"
+  }
+}

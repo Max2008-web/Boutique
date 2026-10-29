@@ -1,0 +1,25 @@
+# Déploiement Render (Blueprint). Un plan payant est nécessaire pour une surveillance 24 h/24
+# (les instances gratuites se mettent en veille) et pour le disque persistant.
+services:
+  - type: web
+    name: pump-terminal
+    runtime: docker
+    dockerContext: ./pump-terminal
+    dockerfilePath: ./pump-terminal/Dockerfile
+    plan: starter
+    healthCheckPath: /api/health
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: SOLANA_RPC_URL
+        sync: false
+      - key: ACCESS_TOKEN
+        generateValue: true
+      - key: XAI_API_KEY
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
