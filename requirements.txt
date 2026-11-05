@@ -1,0 +1,6 @@
+# Agents IA (Python) — installer avec : pip install -r requirements.txt
+claude-agent-sdk>=0.2.178
+
+# Tests des agents
+pytest>=9.2.0
+pytest-asyncio>=1.4.1

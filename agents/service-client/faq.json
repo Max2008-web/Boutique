@@ -1,0 +1,54 @@
+{
+  "entreprise": "Maison Lumen (entreprise fictive de démonstration : boutique en ligne de luminaires)",
+  "contact_humain": "support@maison-lumen.example — du lundi au vendredi, 9h-18h",
+  "questions": [
+    {
+      "id": "livraison-delais",
+      "mots_cles": ["livraison", "délai", "délais", "expédition", "recevoir", "quand", "colis"],
+      "question": "Quels sont les délais de livraison ?",
+      "reponse": "Les commandes sont expédiées sous 48h ouvrées. Livraison en France métropolitaine en 2 à 4 jours ouvrés (Colissimo) ou 24h (Chronopost, option payante)."
+    },
+    {
+      "id": "livraison-frais",
+      "mots_cles": ["frais", "port", "gratuite", "gratuit", "coût", "livraison"],
+      "question": "Combien coûte la livraison ?",
+      "reponse": "La livraison Colissimo coûte 5,90 € et est offerte dès 80 € d'achat. Chronopost 24h : 12,90 €."
+    },
+    {
+      "id": "suivi-commande",
+      "mots_cles": ["suivi", "suivre", "commande", "où", "numéro", "tracking"],
+      "question": "Comment suivre ma commande ?",
+      "reponse": "Un e-mail avec le numéro de suivi est envoyé dès l'expédition. Vous pouvez aussi le retrouver dans « Mon compte > Mes commandes »."
+    },
+    {
+      "id": "retours",
+      "mots_cles": ["retour", "retourner", "rembourser", "remboursement", "renvoyer", "échange", "échanger"],
+      "question": "Puis-je retourner un article ?",
+      "reponse": "Oui, vous disposez de 30 jours après réception pour retourner un article non utilisé dans son emballage d'origine. Le retour est gratuit via l'étiquette disponible dans « Mon compte ». Le remboursement intervient sous 7 jours après réception du colis."
+    },
+    {
+      "id": "casse",
+      "mots_cles": ["cassé", "casse", "abîmé", "endommagé", "défectueux", "panne", "marche pas", "fonctionne"],
+      "question": "Mon article est arrivé cassé ou ne fonctionne pas",
+      "reponse": "Désolé pour ce désagrément. Envoyez une photo de l'article et du colis à support@maison-lumen.example avec votre numéro de commande : nous vous renvoyons un article neuf ou vous remboursons, sans frais."
+    },
+    {
+      "id": "garantie",
+      "mots_cles": ["garantie", "garanti", "ans"],
+      "question": "Quelle est la garantie sur les luminaires ?",
+      "reponse": "Tous nos luminaires sont garantis 2 ans (garantie légale de conformité). Les ampoules LED sont garanties 1 an."
+    },
+    {
+      "id": "paiement",
+      "mots_cles": ["paiement", "payer", "carte", "paypal", "plusieurs fois", "virement"],
+      "question": "Quels moyens de paiement acceptez-vous ?",
+      "reponse": "Carte bancaire (Visa, Mastercard, CB), PayPal et paiement en 3 fois sans frais dès 150 € d'achat."
+    },
+    {
+      "id": "boutique-physique",
+      "mots_cles": ["magasin", "boutique", "showroom", "adresse", "horaires", "venir"],
+      "question": "Avez-vous une boutique physique ?",
+      "reponse": "Oui, notre showroom est au 12 rue des Artisans, 69002 Lyon, ouvert du mardi au samedi de 10h à 19h."
+    }
+  ]
+}
