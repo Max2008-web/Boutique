@@ -1,0 +1,18 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "5.6",
+	"Category": "Games",
+	"Description": "STRIKE ZONE - FPS 3D multiplateforme (Windows / Android)",
+	"Modules": [
+		{
+			"Name": "StrikeZone",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{ "Name": "EnhancedInput", "Enabled": true },
+		{ "Name": "Niagara", "Enabled": true }
+	],
+	"TargetPlatforms": [ "Windows", "Android" ]
+}
