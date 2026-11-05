@@ -9,7 +9,7 @@ export default function App() {
 
   async function handleGenerate() {
     if (!input.trim()) {
-      setError('Veuillez décrire les travaux à réaliser.');
+      setError('Décrivez d’abord les travaux à réaliser.');
       return;
     }
     setError('');
@@ -40,70 +40,110 @@ export default function App() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      setError('Impossible de copier dans le presse-papier.');
+      setError('Copie impossible : sélectionnez le texte du devis à la main.');
+    }
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      if (!loading) handleGenerate();
     }
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800">
-      <div className="mx-auto max-w-3xl px-4 py-10">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900">
-            Générateur de devis
+    <div className="min-h-screen">
+      <div className="mx-auto max-w-6xl px-4 pb-12 pt-10 sm:px-8 sm:pt-14">
+        <header className="max-w-2xl">
+          <h1 className="text-5xl font-extrabold leading-none tracking-tight sm:text-7xl">
+            Devis
           </h1>
-          <p className="mt-2 text-slate-600">
-            Décrivez les travaux en langage courant. L'assistant rédige un devis
-            professionnel et structuré.
+          <p className="mt-4 text-lg leading-relaxed text-graphite/80">
+            Notez les travaux comme sur le chantier. Le devis est rédigé poste
+            par poste, chiffré et prêt à coller dans votre logiciel de
+            facturation.
           </p>
         </header>
 
-        <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-          <label htmlFor="works" className="block text-sm font-medium text-slate-700">
-            Liste des travaux
-          </label>
-          <textarea
-            id="works"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            rows={8}
-            placeholder="Ex : refaire la salle de bain de 6m², carrelage au sol et aux murs, nouveau lavabo, changer la robinetterie, peindre le plafond..."
-            className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-white p-3 text-slate-800 outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
-          />
+        <main className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,4fr)_minmax(0,7fr)] lg:gap-12">
+          <section aria-labelledby="notes-titre">
+            <h2 id="notes-titre" className="text-xl font-bold">
+              <label htmlFor="works">Notes de chantier</label>
+            </h2>
+            <p className="mt-1 text-sm text-graphite/70">
+              Surfaces, matériaux, ce qui est à déposer : en vrac, ça suffit.
+            </p>
+            <textarea
+              id="works"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              rows={12}
+              placeholder="Salle de bain 6 m², carrelage sol et murs, nouveau lavabo, changer la robinetterie, peindre le plafond…"
+              className="quadrille mt-4 block w-full resize-y rounded-sm border-2 border-graphite px-4 py-3 text-base text-graphite placeholder:text-graphite/45 focus:border-carbone focus:outline-none"
+              style={{ lineHeight: '20px', paddingTop: '10px' }}
+            />
 
-          <div className="mt-4 flex items-center gap-3">
-            <button
-              onClick={handleGenerate}
-              disabled={loading}
-              className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {loading ? 'Génération en cours…' : 'Générer'}
-            </button>
-            {error && <span className="text-sm text-red-600">{error}</span>}
-          </div>
-        </section>
-
-        {quote && (
-          <section className="mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-900">
-                Devis généré
-              </h2>
+            <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2">
               <button
-                onClick={handleCopy}
-                className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-100"
+                onClick={handleGenerate}
+                disabled={loading}
+                className="rounded-sm bg-carbone px-6 py-3 text-base font-bold text-white transition-colors hover:bg-graphite disabled:cursor-wait disabled:opacity-70"
               >
-                {copied ? 'Copié !' : 'Copier'}
+                {loading ? 'Rédaction en cours…' : 'Rédiger le devis'}
               </button>
+              <span className="hidden text-sm text-graphite/60 sm:inline">
+                ou Ctrl + Entrée
+              </span>
             </div>
-            <pre className="whitespace-pre-wrap break-words font-sans text-slate-800">
-              {quote}
-            </pre>
+            {error && (
+              <p role="alert" className="mt-4 border-l-4 border-red-700 pl-3 text-sm font-medium text-red-800">
+                {error}
+              </p>
+            )}
           </section>
-        )}
 
-        <footer className="mt-10 text-center text-xs text-slate-400">
-          Les montants proposés sont indicatifs. Vérifiez et ajustez selon votre
-          chantier avant envoi au client.
+          <section aria-labelledby="devis-titre" aria-live="polite" aria-busy={loading}>
+            <div
+              key={quote ? 'rempli' : 'vide'}
+              className={`flex min-h-[26rem] shadow-[6px_8px_0_rgba(43,45,49,0.12)] ${quote ? 'arrivee' : ''}`}
+            >
+              <div className="w-8 shrink-0 bg-souche sm:w-12" aria-hidden="true" />
+              <div className="perforation w-[14px] shrink-0 bg-double" aria-hidden="true" />
+              <div className="min-w-0 flex-1 bg-double px-5 py-5 sm:px-7 sm:py-6">
+                <div className="flex flex-wrap items-baseline justify-between gap-3 border-b-2 border-carbone/25 pb-3">
+                  <h2 id="devis-titre" className="text-xl font-bold text-carbone">
+                    Devis rédigé
+                  </h2>
+                  {quote && (
+                    <button
+                      onClick={handleCopy}
+                      className="rounded-sm border-2 border-carbone px-3 py-1.5 text-sm font-bold text-carbone transition-colors hover:bg-carbone hover:text-double"
+                    >
+                      {copied ? 'Devis copié' : 'Copier le devis'}
+                    </button>
+                  )}
+                </div>
+
+                {quote ? (
+                  <pre className="mt-4 whitespace-pre-wrap break-words font-machine text-[15px] lg:text-[14px] leading-relaxed text-carbone">
+                    {quote}
+                  </pre>
+                ) : (
+                  <p className="mt-6 max-w-sm font-machine text-[15px] leading-relaxed text-carbone/70">
+                    {loading
+                      ? 'Le devis est en cours de rédaction. Comptez une vingtaine de secondes.'
+                      : 'Le devis s’inscrira sur cette feuille. Commencez par noter les travaux.'}
+                  </p>
+                )}
+              </div>
+            </div>
+          </section>
+        </main>
+
+        <footer className="mt-12 max-w-2xl text-sm text-graphite/60">
+          Les montants sont indicatifs. Relisez et ajustez selon votre chantier
+          avant l’envoi au client.
         </footer>
       </div>
     </div>
