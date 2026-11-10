@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>*,*::before,*::after{box-sizing:border-box}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Ressac</title>
+<meta name="description" content="Restaurant de poissons au bout du ponton : poussez la porte, suivez la carte jusqu'au large, puis plongez.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Archivo:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Caveat:wght@500;700&display=swap">
+<style>
+/* Layout: one fixed scene. A canvas draws the pier, sky and sea; the façade, menu boards and panels are DOM layers projected into it as the camera walks forward. Single world: explicit colors everywhere. */
+:root {
+  --lime: #f3ede3;      /* chaux de la façade, papier de la carte */
+  --ink: #12283b;       /* encre bleu nuit */
+  --volet: #2f6fa3;     /* bleu des volets */
+  --coral: #ff7a59;     /* soleil couchant */
+  --sand: #d9c7a8;
+  --slate: #23332e;     /* ardoise de la pêche du jour */
+  --mute: #5d6b74;
+  --glass: rgba(14, 34, 52, .58);
+  --f-display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --f-body: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "DM Mono", ui-monospace, Menlo, monospace;
+  --f-hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+  --ease: cubic-bezier(.2, .8, .1, 1);
+  color-scheme: light;
+}
+html { background: #8fc1df; }
+body { background: #8fc1df; color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+#spacer { width: 1px; height: 700vh; }
+#sky { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* ---------- façade ---------- */
+#facade { position: fixed; inset: 0; overflow: hidden; pointer-events: none; }
+.fbox { position: absolute; left: 0; top: 0; width: 1600px; height: 1000px; transform-origin: 0 0; will-change: transform; }
+.fbox svg { position: absolute; inset: 0; display: block; }
+.flicker { animation: flicker 3.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.flicker.b { animation-delay: -1.3s; }
+@keyframes flicker { 0%, 100% { opacity: .9; } 40% { opacity: .65; } 55% { opacity: 1; } 70% { opacity: .75; } }
+.doors { position: absolute; left: 650px; top: 530px; width: 300px; height: 370px; perspective: 700px; }
+.door {
+  position: absolute; top: 0; width: 150px; height: 100%;
+  background:
+    repeating-linear-gradient(to bottom, rgba(0,0,0,.16) 0 2px, transparent 2px 13px) 18px 22px / 114px 150px no-repeat,
+    linear-gradient(rgba(255,255,255,.08), rgba(0,0,0,.12)) 18px 196px / 114px 150px no-repeat,
+    var(--volet);
+  box-shadow: inset 0 0 0 3px #285f8d, inset 18px 0 0 -14px rgba(0,0,0,.12);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+.door::after { content: ""; position: absolute; top: 52%; width: 10px; height: 10px; border-radius: 50%; background: #c9a463; box-shadow: 0 1px 2px rgba(0,0,0,.4); }
+.door.l { left: 0; transform-origin: left center; border-right: 1px solid #1f4d74; }
+.door.l::after { right: 12px; }
+.door.r { right: 0; transform-origin: right center; }
+.door.r::after { left: 12px; }
+.chalk {
+  position: absolute; left: 1020px; top: 712px; width: 150px; height: 214px; padding: 16px 14px;
+  background: var(--slate); border: 7px solid #8a6a46; border-radius: 4px;
+  color: #eef0e6; font-family: var(--f-hand); line-height: 1.1; text-align: center;
+  box-shadow: 6px 10px 18px rgba(40, 30, 20, .25);
+}
+.chalk b { display: block; font-size: 25px; font-weight: 700; margin-bottom: 8px; }
+.chalk span { display: block; font-size: 19px; margin-bottom: 6px; }
+.chalk small { display: block; font-size: 16px; color: #c7d3c6; }
+
+/* ---------- hero ---------- */
+.hero { position: fixed; left: max(24px, 6vw); top: 21vh; width: min(26rem, calc(100vw - 48px)); display: grid; gap: 16px; z-index: 3; }
+.hero > * { animation: rise 1.1s var(--ease) both; }
+.hero > :nth-child(2) { animation-delay: .08s; } .hero > :nth-child(3) { animation-delay: .16s; } .hero > :nth-child(4) { animation-delay: .24s; }
+@keyframes rise { from { transform: translateY(24px); opacity: 0; } }
+.eyebrow { margin: 0; font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--volet); }
+.hero h1 { margin: 0; font-family: var(--f-display); font-weight: 400; font-style: italic; font-size: clamp(2.6rem, 5.4vw, 4.8rem); line-height: .95; letter-spacing: -0.01em; text-wrap: balance; }
+.hero p { margin: 0; color: var(--mute); max-width: 34ch; }
+.cue { display: flex; align-items: center; gap: 12px; font-family: var(--f-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink); }
+.cue i { width: 34px; height: 34px; border: 1px solid var(--ink); border-radius: 50%; position: relative; }
+.cue i::after { content: ""; position: absolute; left: 50%; top: 9px; width: 1px; height: 10px; background: var(--ink); animation: nudge 1.6s var(--ease) infinite; }
+@keyframes nudge { 0% { transform: translateY(-3px); opacity: 0; } 40% { opacity: 1; } 100% { transform: translateY(8px); opacity: 0; } }
+
+/* ---------- menu boards on the pier ---------- */
+#boards { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+.board { position: absolute; left: 0; top: 0; width: min(400px, 84vw); visibility: hidden; will-change: transform, opacity; perspective: 900px; }
+.board-in {
+  background: var(--lime); color: var(--ink); padding: 26px 26px 22px; border-radius: 6px;
+  box-shadow: 0 30px 60px -20px rgba(10, 20, 35, .55), 0 2px 0 #d8cfbf;
+  display: grid; gap: 14px; transition: transform .6s var(--ease);
+}
+.board .kicker { margin: 0; font-family: var(--f-mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--volet); display: flex; justify-content: space-between; }
+.board h2 { margin: 0; font-family: var(--f-display); font-weight: 400; font-style: italic; font-size: 52px; line-height: .9; }
+.menu { list-style: none; margin: 0; padding: 0; display: grid; }
+.menu li { display: grid; grid-template-columns: 1fr auto; gap: 4px 16px; padding: 11px 0; border-top: 1px dashed rgba(18, 40, 59, .25); align-items: baseline; }
+.menu b { font-weight: 600; font-size: 15px; }
+.menu small { grid-column: 1; display: block; color: var(--mute); font-size: 13px; line-height: 1.4; }
+.menu .p { grid-column: 2; grid-row: 1; font-family: var(--f-mono); font-size: 14px; font-variant-numeric: tabular-nums; }
+.board.chalkb .board-in { background: var(--slate); color: #eef0e6; border: 9px solid #8a6a46; border-radius: 4px; font-family: var(--f-hand); gap: 6px; }
+.chalkb .kicker { color: #b8d6c9; }
+.chalkb h2 { font-family: var(--f-hand); font-style: normal; font-weight: 700; font-size: 50px; }
+.chalkb ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; font-size: 25px; }
+.chalkb li { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid rgba(238, 240, 230, .12); padding: 4px 0; }
+.chalkb li span:last-child { color: #f6d58b; }
+.chalkb p { margin: 6px 0 0; font-size: 21px; color: #c7d3c6; }
+
+/* ---------- panels ---------- */
+.panel {
+  position: fixed; left: 50%; top: 50%; z-index: 4; width: min(460px, calc(100vw - 40px));
+  max-height: calc(100% - 150px); overflow: auto;
+  transform: translate(-50%, -46%); opacity: 0; visibility: hidden;
+  background: var(--glass); color: var(--lime); border: 1px solid rgba(243, 237, 227, .22);
+  backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border-radius: 20px; padding: 26px; display: grid; gap: 16px; color-scheme: dark;
+}
+.panel h2 { margin: 0; font-family: var(--f-display); font-style: italic; font-weight: 400; font-size: clamp(34px, 6vw, 46px); line-height: .95; text-wrap: balance; }
+.panel .eyebrow { color: #ffc9a8; }
+.panel p { margin: 0; color: #c9d4da; font-size: 15px; }
+form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field { display: grid; gap: 6px; min-width: 0; }
+.field.full { grid-column: 1 / -1; }
+label, .lbl { font-family: var(--f-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #a9bcc6; }
+input, select {
+  width: 100%; font: 500 15px var(--f-body); color: var(--lime); background: rgba(243, 237, 227, .08);
+  border: 1px solid rgba(243, 237, 227, .25); border-radius: 10px; padding: 11px 12px; min-width: 0;
+}
+input:focus, select:focus { outline: none; border-color: #ffc9a8; box-shadow: 0 0 0 3px rgba(255, 122, 89, .25); }
+.check { grid-column: 1 / -1; display: flex; gap: 10px; align-items: center; font-size: 14px; color: #dbe4e8; text-transform: none; letter-spacing: 0; font-family: var(--f-body); }
+.check input { width: 18px; height: 18px; accent-color: var(--coral); }
+.btn {
+  font: 600 15px var(--f-body); border: 0; border-radius: 999px; padding: 15px 24px; cursor: pointer;
+  background: var(--coral); color: #21140f; box-shadow: 0 10px 30px -8px rgba(255, 122, 89, .7);
+  transition: transform .4s var(--ease), box-shadow .3s, background .3s;
+}
+.btn:hover { background: #ff8e72; box-shadow: 0 14px 40px -6px rgba(255, 122, 89, .85); }
+.btn.ghost { background: transparent; color: var(--lime); border: 1px solid rgba(243, 237, 227, .35); box-shadow: none; }
+.btn.ghost:hover { background: rgba(243, 237, 227, .1); }
+form .btn { grid-column: 1 / -1; }
+.note { grid-column: 1 / -1; font-size: 12px !important; color: #93a7b2 !important; }
+.ok { grid-column: 1 / -1; padding: 12px 14px; border-radius: 10px; background: rgba(255, 122, 89, .16); border: 1px solid rgba(255, 122, 89, .4); color: #ffe3d7 !important; }
+dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 10px 18px; font-size: 14px; }
+dt { font-family: var(--f-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #9fd3e0; padding-top: 2px; }
+dd { margin: 0; color: #e3edf0; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+#under { background: rgba(4, 38, 59, .5); }
+#under .eyebrow { color: #9fd3e0; }
+:focus-visible { outline: 2px solid var(--coral); outline-offset: 3px; }
+
+/* ---------- HUD ---------- */
+.top {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 6; display: flex; justify-content: space-between; align-items: center;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 24px 16px; color: var(--lime); transition: color .5s;
+}
+.brand { font-family: var(--f-display); font-style: italic; font-size: 28px; line-height: 1; }
+.top .btn { padding: 10px 18px; font-size: 14px; box-shadow: none; }
+.readout {
+  position: fixed; left: 24px; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 6;
+  display: grid; gap: 2px; color: var(--lime); pointer-events: none; transition: color .5s;
+  text-shadow: 0 1px 12px rgba(10, 20, 35, .35);
+}
+.readout .lbl { color: inherit; opacity: .75; }
+.readout .val { font-family: var(--f-display); font-style: italic; font-size: clamp(30px, 3.6vw, 42px); line-height: 1; font-variant-numeric: tabular-nums; }
+.readout .row { font-family: var(--f-mono); font-size: 12px; opacity: .85; font-variant-numeric: tabular-nums; }
+.nav { position: fixed; right: 22px; top: 50%; transform: translateY(-50%); z-index: 6; }
+.nav ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.nav button {
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px; width: 100%;
+  background: none; border: 0; cursor: pointer; padding: 5px 0; color: var(--lime);
+  font-family: var(--f-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; transition: color .5s;
+}
+.nav button span { opacity: 0; transform: translateX(6px); transition: opacity .3s, transform .3s; white-space: nowrap; text-shadow: 0 1px 10px rgba(10, 20, 35, .4); }
+.nav:hover button span, .nav button.cur span, .nav button:focus-visible span { opacity: 1; transform: none; }
+.nav button i { width: 8px; height: 8px; border-radius: 50%; border: 1px solid currentColor; transition: all .3s; flex: none; }
+.nav button.cur i { background: var(--coral); border-color: var(--coral); transform: scale(1.4); }
+.wall .top, .wall .readout, .wall .nav button { color: var(--ink); }
+.wall .readout, .wall .nav button span { text-shadow: none; }
+
+@media (max-width: 760px) {
+  .hero { top: 74px; left: 20px; gap: 10px; }
+  .hero h1 { font-size: 2.35rem; }
+  .hero p { font-size: 14px; }
+  .sign { display: none; }
+  .nav { right: 10px; }
+  .nav button span { display: none; }
+  .readout { left: 18px; }
+  .top { padding-inline: 18px; }
+  .board h2 { font-size: 40px; }
+  .board-in { padding: 20px 18px 16px; gap: 10px; }
+  .menu li { padding: 8px 0; }
+  .chalkb ul { font-size: 22px; }
+  form { grid-template-columns: 1fr; }
+  .panel { padding: 20px; gap: 12px; max-height: calc(100% - 170px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero > *, .flicker, .cue i::after { animation: none; }
+}
+</style>
+
+<div id="spacer"></div>
+<canvas id="sky" aria-hidden="true"></canvas>
+
+<!-- façade -->
+<div id="facade" aria-hidden="true"><div class="fbox" id="fbox">
+  <svg viewBox="0 0 1600 1000" width="1600" height="1000">
+    <defs>
+      <filter id="grain" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="3" result="fine"/>
+        <feTurbulence type="fractalNoise" baseFrequency=".006 .02" numOctaves="3" seed="8" result="wash"/>
+        <feBlend in="fine" in2="wash" mode="multiply" result="mix"/>
+        <feColorMatrix in="mix" type="matrix" values="0 0 0 0 .42  0 0 0 0 .36  0 0 0 0 .28  .55 0 0 0 -.12"/>
+        <feComposite in2="SourceAlpha" operator="in"/>
+      </filter>
+      <linearGradient id="sun" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ffd59a" stop-opacity=".45"/>
+        <stop offset=".55" stop-color="#ffe8c4" stop-opacity="0"/>
+        <stop offset="1" stop-color="#6b5a45" stop-opacity=".18"/>
+      </linearGradient>
+      <radialGradient id="glow"><stop offset="0" stop-color="#ffcf7a" stop-opacity=".75"/><stop offset="1" stop-color="#ffcf7a" stop-opacity="0"/></radialGradient>
+      <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3d6a86"/><stop offset=".5" stop-color="#1c3a50"/><stop offset="1" stop-color="#14293a"/></linearGradient>
+      <pattern id="slats" width="70" height="14" patternUnits="userSpaceOnUse"><rect width="70" height="14" fill="#2f6fa3"/><rect y="10" width="70" height="4" fill="#245a87"/></pattern>
+    </defs>
+    <path d="M0 0H1600V1000H0Z M650 900V530A150 150 0 0 1 950 530V900Z" fill="#f3ede3" fill-rule="evenodd"/>
+    <path d="M0 0H1600V1000H0Z M650 900V530A150 150 0 0 1 950 530V900Z" fill="url(#sun)" fill-rule="evenodd"/>
+    <path d="M0 0H1600V1000H0Z M650 900V530A150 150 0 0 1 950 530V900Z" fill="#000" fill-rule="evenodd" filter="url(#grain)" opacity=".7"/>
+    <!-- roof shadow -->
+    <rect width="1600" height="60" fill="#6b5a45" opacity=".12"/>
+    <!-- stone surround + fanlight -->
+    <path d="M628 900V530A172 172 0 0 1 972 530V900" fill="none" stroke="#dccbb0" stroke-width="44"/>
+    <path d="M650 900V530A150 150 0 0 1 950 530V900" fill="none" stroke="#6b5a45" stroke-opacity=".35" stroke-width="5"/>
+    <g fill="none" stroke="#2f6fa3" stroke-width="7" stroke-linecap="round">
+      <path d="M650 530H950"/>
+      <path d="M800 530L670 455M800 530L725 400M800 530V380M800 530L875 400M800 530L930 455"/>
+      <path d="M760 530A40 40 0 0 1 840 530"/>
+    </g>
+    <!-- sign -->
+    <g class="sign">
+      <text x="800" y="296" text-anchor="middle" font-family="Instrument Serif, Georgia, serif" font-style="italic" font-size="118" fill="#2f6fa3">Ressac</text>
+      <text x="800" y="336" text-anchor="middle" font-family="DM Mono, monospace" font-size="17" letter-spacing="6" fill="#7a6650">CUISINE DE LA MER · PONTON N° 7</text>
+    </g>
+    <!-- lanterns -->
+    <g>
+      <circle class="flicker" cx="590" cy="610" r="110" fill="url(#glow)"/>
+      <circle class="flicker b" cx="1010" cy="610" r="110" fill="url(#glow)"/>
+      <path d="M560 560H590V585M1040 560H1010V585" stroke="#2b2b2b" stroke-width="5" fill="none"/>
+      <rect x="575" y="585" width="30" height="48" rx="3" fill="#ffcf7a" stroke="#2b2b2b" stroke-width="5"/>
+      <rect x="995" y="585" width="30" height="48" rx="3" fill="#ffcf7a" stroke="#2b2b2b" stroke-width="5"/>
+    </g>
+    <!-- right window with open shutters -->
+    <rect x="1180" y="380" width="200" height="270" fill="#dccbb0"/>
+    <rect x="1196" y="396" width="168" height="238" fill="url(#glass)"/>
+    <path d="M1196 396H1364V420L1196 600Z" fill="#fff" opacity=".07"/>
+    <path d="M1280 396V634M1196 515H1364" stroke="#e9e1d3" stroke-width="7"/>
+    <rect x="1108" y="390" width="72" height="250" fill="url(#slats)" stroke="#245a87" stroke-width="3"/>
+    <rect x="1380" y="390" width="72" height="250" fill="url(#slats)" stroke="#245a87" stroke-width="3"/>
+    <rect x="1168" y="650" width="224" height="34" rx="3" fill="#b8613e"/>
+    <g fill="#d1336f">
+      <circle cx="1190" cy="642" r="16"/><circle cx="1215" cy="632" r="13" fill="#e45a8c"/><circle cx="1245" cy="644" r="15"/><circle cx="1275" cy="634" r="12" fill="#e45a8c"/>
+      <circle cx="1305" cy="642" r="16"/><circle cx="1335" cy="632" r="13" fill="#e45a8c"/><circle cx="1365" cy="642" r="15"/><circle cx="1385" cy="660" r="11"/>
+      <circle cx="1172" cy="668" r="10" fill="#e45a8c"/><circle cx="1188" cy="690" r="9"/><circle cx="1380" cy="690" r="9" fill="#e45a8c"/>
+    </g>
+    <g fill="#4f7a3e"><circle cx="1230" cy="652" r="7"/><circle cx="1290" cy="650" r="6"/><circle cx="1350" cy="654" r="7"/></g>
+    <!-- bougainvillea over the arch -->
+    <path d="M520 1000C520 760 560 520 690 395C740 350 790 345 830 350" fill="none" stroke="#6b4a32" stroke-width="8"/>
+    <g>
+      <circle cx="560" cy="560" r="20" fill="#d1336f"/><circle cx="585" cy="520" r="16" fill="#e45a8c"/><circle cx="610" cy="480" r="22" fill="#d1336f"/>
+      <circle cx="640" cy="440" r="18" fill="#e45a8c"/><circle cx="672" cy="410" r="21" fill="#d1336f"/><circle cx="705" cy="388" r="16" fill="#e45a8c"/>
+      <circle cx="740" cy="372" r="19" fill="#d1336f"/><circle cx="778" cy="362" r="15" fill="#e45a8c"/><circle cx="815" cy="358" r="12" fill="#d1336f"/>
+      <circle cx="595" cy="455" r="12" fill="#c02a62"/><circle cx="660" cy="385" r="13" fill="#c02a62"/><circle cx="545" cy="610" r="14" fill="#e45a8c"/>
+      <circle cx="530" cy="680" r="12" fill="#d1336f"/><circle cx="625" cy="505" r="9" fill="#4f7a3e"/><circle cx="690" cy="430" r="8" fill="#4f7a3e"/><circle cx="755" cy="390" r="8" fill="#4f7a3e"/>
+    </g>
+    <!-- olive tree in a pot -->
+    <path d="M430 960L445 860H545L560 960Z" fill="#b8613e"/>
+    <rect x="438" y="850" width="114" height="16" rx="3" fill="#a4553a"/>
+    <path d="M495 852C492 800 500 770 488 730" stroke="#6b4a32" stroke-width="9" fill="none"/>
+    <g fill="#7d9461"><ellipse cx="470" cy="720" rx="38" ry="24"/><ellipse cx="515" cy="700" rx="40" ry="28"/><ellipse cx="490" cy="680" rx="30" ry="20" fill="#8fa672"/><ellipse cx="530" cy="735" rx="26" ry="16" fill="#6d8553"/></g>
+    <!-- steps and ground -->
+    <rect x="610" y="900" width="380" height="30" fill="#e2d6c2"/>
+    <rect x="590" y="930" width="420" height="30" fill="#d6c8b0"/>
+    <rect y="960" width="1600" height="40" fill="#cbbb9f"/>
+    <path d="M610 900H990" stroke="#6b5a45" stroke-opacity=".3" stroke-width="3"/>
+  </svg>
+  <div class="doors"><div class="door l" id="doorL"></div><div class="door r" id="doorR"></div></div>
+  <div class="chalk"><b>Pêche du jour</b><span>Rouget</span><span>Loup de ligne</span><span>Poulpe</span><small>bateau rentré à 6 h 40</small></div>
+</div></div>
+
+<header class="hero" id="hero">
+  <p class="eyebrow">Ressac · Ponton n° 7</p>
+  <h1>Entrez.<br>La mer est au bout.</h1>
+  <p>Poussez la porte et suivez le ponton&nbsp;: la carte, la pêche du jour, puis une table face au large.</p>
+  <div class="cue"><i></i>Faites défiler pour entrer</div>
+</header>
+
+<!-- boards along the pier -->
+<div id="boards">
+  <article class="board" data-z="12.2" data-side="-1" aria-label="Entrées">
+    <div class="board-in">
+      <p class="kicker"><span>La carte</span><span>1 / 3</span></p>
+      <h2>Entrées</h2>
+      <ul class="menu">
+        <li><b>Huîtres de Bouzigues n° 3</b><span class="p">18 €</span><small>Les six, mignonnette au vinaigre de Banyuls</small></li>
+        <li><b>Poulpe grillé</b><span class="p">16 €</span><small>Pommes grenaille, paprika fumé, citron brûlé</small></li>
+        <li><b>Carpaccio de daurade</b><span class="p">15 €</span><small>Agrumes, huile d'olive verte, fleur de sel</small></li>
+      </ul>
+    </div>
+  </article>
+  <article class="board" data-z="30.2" data-side="1" aria-label="Plats">
+    <div class="board-in">
+      <p class="kicker"><span>La carte</span><span>2 / 3</span></p>
+      <h2>Plats</h2>
+      <ul class="menu">
+        <li><b>Loup de ligne entier</b><span class="p">34 €</span><small>Fenouil confit, beurre blanc au citron</small></li>
+        <li><b>Bouillabaisse du pêcheur</b><span class="p">68 €</span><small>Pour deux, à commander la veille</small></li>
+        <li><b>Risotto à l'encre</b><span class="p">26 €</span><small>Seiche snackée, aïoli au safran</small></li>
+      </ul>
+    </div>
+  </article>
+  <article class="board" data-z="48.2" data-side="-1" aria-label="Desserts">
+    <div class="board-in">
+      <p class="kicker"><span>La carte</span><span>3 / 3</span></p>
+      <h2>Desserts</h2>
+      <ul class="menu">
+        <li><b>Tarte au citron de Menton</b><span class="p">11 €</span><small>Meringue brûlée au chalumeau</small></li>
+        <li><b>Fraises de pays</b><span class="p">10 €</span><small>Sorbet basilic, sablé breton</small></li>
+        <li><b>Glace au lait d'amande</b><span class="p">9 €</span><small>Huile d'olive, fleur de sel</small></li>
+      </ul>
+    </div>
+  </article>
+  <article class="board chalkb" data-z="66.2" data-side="1" aria-label="Pêche du jour">
+    <div class="board-in">
+      <p class="kicker"><span>Ardoise</span><span>Arrivée 6 h 40</span></p>
+      <h2>Pêche du jour</h2>
+      <ul>
+        <li><span>Rouget barbet</span><span>12,4 kg</span></li>
+        <li><span>Loup de ligne</span><span>6 pièces</span></li>
+        <li><span>Poulpe de roche</span><span>8,1 kg</span></li>
+        <li><span>Saint-Pierre</span><span>3 pièces</span></li>
+      </ul>
+      <p>Prix au poids, selon la criée du matin.</p>
+    </div>
+  </article>
+</div>
+
+<!-- reservation, at the end of the pier -->
+<section class="panel" id="resa" aria-labelledby="resa-t">
+  <p class="eyebrow">Bout du ponton · face au large</p>
+  <h2 id="resa-t">Une table pour le coucher du soleil</h2>
+  <form id="form" novalidate>
+    <div class="field"><label for="r-date">Date</label><input id="r-date" type="date" required></div>
+    <div class="field"><label for="r-time">Heure</label>
+      <select id="r-time"><option>19 h 00</option><option>19 h 30</option><option selected>20 h 00</option><option>20 h 30</option><option>21 h 00</option><option>21 h 30</option></select></div>
+    <div class="field"><label for="r-guests">Couverts</label>
+      <select id="r-guests"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select></div>
+    <div class="field"><label for="r-name">Nom</label><input id="r-name" type="text" autocomplete="name" placeholder="Votre nom" required></div>
+    <label class="check" for="r-end"><input id="r-end" type="checkbox" checked> Table en bout de ponton, selon disponibilité</label>
+    <button class="btn" type="submit">Demander la table</button>
+    <p class="note">Site de démonstration : aucune demande n'est transmise.</p>
+    <p class="ok" id="ok" hidden aria-live="polite"></p>
+  </form>
+</section>
+
+<!-- underwater -->
+<section class="panel" id="under" aria-labelledby="under-t">
+  <p class="eyebrow">Sous le ponton · −2,4 m</p>
+  <h2 id="under-t">Vous avez plongé.</h2>
+  <p>Le Ressac est posé au bout du ponton n° 7. Remontez quand vous voulez, votre table vous attend face au large.</p>
+  <dl>
+    <dt>Horaires</dt><dd>Mardi – dimanche, 12 h – 14 h 30 et 19 h – 22 h 30</dd>
+    <dt>Fermé</dt><dd>Le lundi</dd>
+    <dt>Accès</dt><dd>À pied par le quai des pêcheurs, parking du port à 300 m</dd>
+    <dt>Ce soir</dt><dd>Coucher du soleil à 21 h 14, mer à 22 °C</dd>
+  </dl>
+  <div class="actions">
+    <button class="btn" type="button" data-go="5">Réserver une table</button>
+    <button class="btn ghost" type="button" data-go="0">Remonter à la surface</button>
+  </div>
+</section>
+
+<div class="top"><span class="brand">Ressac</span><button class="btn" type="button" data-go="5">Réserver</button></div>
+<div class="readout"><span class="lbl" id="hLbl">Devant le restaurant</span><span class="val" id="hVal">Ponton n° 7</span><span class="row" id="hRow">Ouvert ce soir, 19 h – 22 h 30</span></div>
+<nav class="nav" aria-label="Étapes de la visite"><ol id="stops"></ol></nav>
+
+<script>
+(() => {
+  const doc = document.documentElement;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const $ = (s) => document.querySelector(s);
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const sstep = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+  const smoother = (t) => t * t * t * (t * (t * 6 - 15) + 10);
+  const mixRGB = (a, b, t) => a.map((v, i) => Math.round(lerp(v, b[i], t)));
+  const rgb = (c, a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+
+  const NAMES = ['Entrée', 'Entrées', 'Plats', 'Desserts', 'Pêche du jour', 'Réserver', 'Sous l\'eau'];
+  const LAST = NAMES.length - 1;
+  const CAMS = [0, 9, 27, 45, 63, 96.2, 96.2];
+  const PIER = 100, EYE = 1.6, WATER = -1.25;
+
+  /* ---------- nav ---------- */
+  const stopsEl = $('#stops');
+  NAMES.forEach((n, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<button type="button" data-go="${i}"><span>${n}</span><i></i></button>`;
+    stopsEl.appendChild(li);
+  });
+  const navBtns = [...stopsEl.querySelectorAll('button')];
+
+  /* ---------- scroll ---------- */
+  const spacer = $('#spacer');
+  let seg = 1, target = 0, q = 0;
+  const goTo = (i) => window.scrollTo({ top: i * seg, behavior: 'instant' });
+  document.addEventListener('click', (e) => { const b = e.target.closest('[data-go]'); if (b) goTo(+b.dataset.go); });
+  const readScroll = () => { target = clamp(window.scrollY / seg, 0, LAST); };
+  addEventListener('scroll', readScroll, { passive: true });
+
+  /* ---------- canvas ---------- */
+  const cv = $('#sky'), ctx = cv.getContext('2d');
+  let W = 0, H = 0, F = 1, HY = 0;
+  function layout() {
+    const keep = target;
+    seg = innerHeight * 1.3;
+    spacer.style.height = (LAST * seg + innerHeight) + 'px';
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    W = innerWidth; H = innerHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    F = Math.min(W, H) * 1.05;
+    HY = H * 0.5;
+    window.scrollTo(0, keep * seg);
+    readScroll();
+  }
+  addEventListener('resize', layout);
+
+  /* ---------- pointer ---------- */
+  let tmx = innerWidth / 2, tmy = innerHeight / 2, mx = tmx, my = tmy, pointerSeen = false, lastBubble = 0;
+  addEventListener('pointermove', (e) => { tmx = e.clientX; tmy = e.clientY; pointerSeen = true; }, { passive: true });
+
+  /* ---------- state from scroll ---------- */
+  const S = { camZ: 0, door: 0, zoom: 0, facade: 1, water: 0, sunset: 0, hero: 1, p: 0 };
+  function computeState(p) {
+    const i = Math.min(LAST - 1, Math.floor(p)), u = p - i;
+    const e = smoother(clamp((u - 0.2) / 0.6, 0, 1));
+    if (i === 0) {
+      S.door = sstep(0.02, 0.38, u);
+      S.zoom = sstep(0.28, 0.78, u);
+      S.facade = 1 - sstep(0.6, 0.78, u);
+      S.camZ = lerp(CAMS[0], CAMS[1], smoother(clamp((u - 0.45) / 0.55, 0, 1)));
+      S.hero = 1 - sstep(0, 0.16, u);
+    } else {
+      S.door = 1; S.zoom = 1; S.facade = 0; S.hero = 0;
+      S.camZ = lerp(CAMS[i], CAMS[i + 1], e);
+    }
+    if (p >= LAST) { S.camZ = CAMS[LAST]; }
+    S.water = i === LAST - 1 ? e : (p >= LAST ? 1 : 0);
+    S.sunset = clamp(S.camZ / 96, 0, 1);
+    S.p = p;
+  }
+
+  /* ---------- façade ---------- */
+  const fbox = $('#fbox'), facadeEl = $('#facade'), hero = $('#hero');
+  const doorL = $('#doorL'), doorR = $('#doorR');
+  function placeFacade(px) {
+    const s0 = Math.max(W / 1600, H / 1000);
+    const Z = Math.exp(Math.log(16) * Math.pow(S.zoom, 1.6));
+    const s = s0 * Z;
+    const baseX = W / 2, baseY = H / 2 + 212 * s0;
+    const k = sstep(0, 0.6, S.zoom);
+    const dx = lerp(baseX, W / 2, k) + px * (1 - S.zoom);
+    const dy = lerp(baseY, H / 2, k);
+    fbox.style.transform = `translate(${(dx - 800 * s).toFixed(2)}px, ${(dy - 712 * s).toFixed(2)}px) scale(${s.toFixed(4)})`;
+    doorL.style.transform = `rotateY(${(S.door * 104).toFixed(2)}deg)`;
+    doorR.style.transform = `rotateY(${(-S.door * 104).toFixed(2)}deg)`;
+    facadeEl.style.opacity = S.facade.toFixed(3);
+    facadeEl.style.visibility = S.facade < 0.005 ? 'hidden' : 'visible';
+    hero.style.opacity = S.hero.toFixed(3);
+    hero.style.visibility = S.hero < 0.01 ? 'hidden' : 'visible';
+    hero.style.transform = `translateY(${(-40 * (1 - S.hero)).toFixed(1)}px)`;
+    doc.classList.toggle('wall', S.facade > 0.5);
+  }
+
+  /* ---------- projection ---------- */
+  let camX = 0;
+  function proj(x, y, z) {
+    const dz = z - S.camZ;
+    if (dz < 0.05) return null;
+    const s = F / dz;
+    return { x: W / 2 + (x - camX) * s, y: HY + (EYE - y) * s, s };
+  }
+
+  /* ---------- boards ---------- */
+  const boards = [...document.querySelectorAll('.board')].map((el) => ({
+    el, inner: el.querySelector('.board-in'), z: +el.dataset.z, side: +el.dataset.side,
+  }));
+  boards.forEach((b) => {
+    b.inner.addEventListener('pointermove', (e) => {
+      if (reduce || !fine) return;
+      const r = b.inner.getBoundingClientRect();
+      const u = (e.clientX - r.left) / r.width - 0.5, v = (e.clientY - r.top) / r.height - 0.5;
+      b.inner.style.transform = `rotateX(${(-v * 8).toFixed(2)}deg) rotateY(${(u * 10).toFixed(2)}deg)`;
+    });
+    b.inner.addEventListener('pointerleave', () => { b.inner.style.transform = ''; });
+  });
+  function placeBoards() {
+    const narrow = W < 760;
+    boards.forEach((b) => {
+      const dz = b.z - S.camZ;
+      let o = clamp((dz - 1.1) / 1.3, 0, 1) * clamp((26 - dz) / 12, 0, 1);
+      if (S.zoom < 1) o *= S.zoom;
+      if (o < 0.005 || dz <= 0.3) { if (b.el.style.visibility !== 'hidden') b.el.style.visibility = 'hidden'; b.el.style.pointerEvents = 'none'; return; }
+      const x = narrow ? 0 : b.side * 0.82;
+      const p = proj(x, 1.42, b.z);
+      if (!p) return;
+      const k = Math.min(3.2 / dz, 4);
+      b.el.style.visibility = 'visible';
+      b.el.style.opacity = o.toFixed(3);
+      b.el.style.transform = `translate(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px) translate(-50%, -50%) scale(${k.toFixed(4)})`;
+      b.el.style.pointerEvents = Math.abs(dz - 3.2) < 0.8 ? 'auto' : 'none';
+      b.el.style.zIndex = String(1000 - Math.round(dz * 10));
+    });
+  }
+
+  /* ---------- panels ---------- */
+  const resa = $('#resa'), under = $('#under');
+  function placePanels() {
+    const a = clamp(1 - Math.abs(S.p - (LAST - 1)) / 0.32, 0, 1);
+    const b = sstep(LAST - 0.3, LAST, S.p);
+    [[resa, a], [under, b]].forEach(([el, o]) => {
+      el.style.opacity = o.toFixed(3);
+      el.style.visibility = o < 0.01 ? 'hidden' : 'visible';
+      el.style.transform = `translate(-50%, ${(-50 + (1 - o) * 6).toFixed(2)}%) scale(${(0.96 + o * 0.04).toFixed(4)})`;
+    });
+  }
+
+  /* ---------- sky palette ---------- */
+  const SKY = {
+    top: [[78, 145, 205], [58, 78, 150], [40, 40, 96]],
+    mid: [[150, 202, 232], [222, 160, 150], [198, 96, 118]],
+    hor: [[255, 228, 186], [255, 196, 128], [255, 150, 96]],
+    sea: [[42, 118, 160], [44, 86, 128], [38, 52, 92]],
+    deep: [[14, 64, 98], [18, 44, 78], [16, 26, 54]],
+  };
+  const pal = (key, k) => { const a = SKY[key]; const i = Math.min(1, Math.floor(k * 2)), f = k * 2 - i; return mixRGB(a[i], a[i + 1], f); };
+
+  const clouds = [[0.12, 0.2, 0.26], [0.45, 0.12, 0.34], [0.78, 0.24, 0.22], [0.3, 0.33, 0.16], [0.92, 0.1, 0.2]];
+
+  /* ---------- underwater life ---------- */
+  const fish = Array.from({ length: 34 }, () => ({ ox: (Math.random() - 0.5) * 240, oy: (Math.random() - 0.5) * 120, ph: Math.random() * 6.28, sz: 0.7 + Math.random() * 0.6, px: 0, py: 0 }));
+  let bubbles = [];
+  const addBubble = (x, y, r) => { if (bubbles.length < 160) bubbles.push({ x, y, r, v: 30 + r * 12, ph: Math.random() * 6.28 }); };
+
+  function drawAbove(t, k) {
+    // sky
+    const top = pal('top', k), mid = pal('mid', k), hor = pal('hor', k);
+    const g = ctx.createLinearGradient(0, 0, 0, HY);
+    g.addColorStop(0, rgb(top)); g.addColorStop(0.62, rgb(mid)); g.addColorStop(1, rgb(hor));
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, HY + 1);
+
+    // sun
+    const R = Math.min(W, H) * 0.055;
+    const sunX = W * 0.6 - camX * 6;
+    const sunY = lerp(HY - H * 0.3, HY + R * 0.35, k);
+    ctx.globalCompositeOperation = 'lighter';
+    const sg = ctx.createRadialGradient(sunX, sunY, R * 0.5, sunX, sunY, R * 7);
+    sg.addColorStop(0, `rgba(255,${Math.round(lerp(236, 170, k))},${Math.round(lerp(190, 110, k))},0.55)`);
+    sg.addColorStop(1, 'rgba(255,160,90,0)');
+    ctx.fillStyle = sg; ctx.fillRect(sunX - R * 7, sunY - R * 7, R * 14, R * 14);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, HY); ctx.clip();
+    ctx.fillStyle = `rgb(255,${Math.round(lerp(244, 196, k))},${Math.round(lerp(214, 140, k))})`;
+    ctx.beginPath(); ctx.arc(sunX, sunY, R, 0, 6.283); ctx.fill();
+    ctx.restore();
+
+    // clouds
+    clouds.forEach(([cx, cy, cw], i) => {
+      const x = ((cx + t * 0.004 * (1 + i * 0.2)) % 1.3 - 0.15) * W - camX * 3;
+      const y = cy * HY, w = cw * W, h = w * 0.09;
+      const cg = ctx.createRadialGradient(x, y, 0, x, y, w / 2);
+      const tint = mixRGB([255, 255, 255], [255, 170, 150], k);
+      cg.addColorStop(0, rgb(tint, 0.42 - k * 0.12)); cg.addColorStop(1, rgb(tint, 0));
+      ctx.save(); ctx.translate(x, y); ctx.scale(1, h / (w / 2)); ctx.translate(-x, -y);
+      ctx.fillStyle = cg; ctx.beginPath(); ctx.arc(x, y, w / 2, 0, 6.283); ctx.fill(); ctx.restore();
+    });
+
+    // gulls
+    ctx.strokeStyle = `rgba(30,40,55,${0.55 - k * 0.15})`; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+    for (let i = 0; i < 3; i++) {
+      const x = ((t * 16 * (1 + i * 0.35) + i * 0.37 * W) % (W + 200)) - 100;
+      const y = HY * (0.32 + i * 0.13) + Math.sin(t * 0.7 + i) * 12;
+      const s = 9 + i * 2, fl = Math.sin(t * 5 + i * 2) * 0.6;
+      ctx.beginPath();
+      ctx.moveTo(x - s, y - fl * s * 0.5);
+      ctx.quadraticCurveTo(x - s * 0.45, y - s * 0.55, x, y);
+      ctx.quadraticCurveTo(x + s * 0.45, y - s * 0.55, x + s, y - fl * s * 0.5);
+      ctx.stroke();
+    }
+
+    // sea
+    const sea = pal('sea', k), deep = pal('deep', k);
+    const sgr = ctx.createLinearGradient(0, HY, 0, H);
+    sgr.addColorStop(0, rgb(mixRGB(hor, sea, 0.55))); sgr.addColorStop(0.25, rgb(sea)); sgr.addColorStop(1, rgb(deep));
+    ctx.fillStyle = sgr; ctx.fillRect(0, HY, W, H - HY);
+
+    // wave lines (world-fixed so they slide toward you)
+    const seaEye = EYE - WATER;
+    ctx.lineWidth = 1;
+    const z0 = Math.ceil((S.camZ + 1) / 1.6);
+    for (let n = z0; n < z0 + 90; n++) {
+      const zw = n * 1.6, dz = zw - S.camZ;
+      const y = HY + seaEye * F / dz;
+      if (y > H + 10) continue;
+      const a = clamp(0.16 * (1 - dz / 140), 0, 0.16);
+      if (a < 0.01) break;
+      ctx.strokeStyle = `rgba(235,245,255,${a.toFixed(3)})`;
+      ctx.beginPath();
+      for (let x = -20; x <= W + 20; x += W / 14) {
+        const yy = y + Math.sin(x * 0.012 + t * 1.3 + n) * Math.min(6, 40 / dz);
+        x <= -20 ? ctx.moveTo(x, yy) : ctx.lineTo(x, yy);
+      }
+      ctx.stroke();
+    }
+
+    // sun glitter
+    ctx.globalCompositeOperation = 'lighter';
+    const glit = 1 - k * 0.35;
+    for (let i = 0; i < 70; i++) {
+      const f = i / 70;
+      const y = HY + 2 + (H - HY) * Math.pow(f, 1.7);
+      const w = (6 + 300 * f) * (0.3 + 0.7 * Math.abs(Math.sin(t * 1.9 + i * 1.37)));
+      const x = sunX + Math.sin(t * 0.8 + i * 2.1) * (8 + i * 1.2);
+      ctx.fillStyle = `rgba(255,${Math.round(lerp(236, 180, k))},${Math.round(lerp(190, 120, k))},${(0.32 * (1 - f * 0.8) * glit).toFixed(3)})`;
+      ctx.fillRect(x - w / 2, y, w, 1.5 + f * 2);
+    }
+    ctx.globalCompositeOperation = 'source-over';
+
+    drawPier(t, k);
+  }
+
+  function poly(pts, fill) {
+    if (pts.some((p) => !p)) return;
+    ctx.fillStyle = fill; ctx.beginPath();
+    pts.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
+    ctx.closePath(); ctx.fill();
+  }
+
+  function drawPier(t, k) {
+    const zn = S.camZ + 0.3;
+    if (zn >= PIER) return;
+    const light = 1 - k * 0.45;
+    const wood = (c) => rgb(c.map((v) => Math.round(v * light)));
+    ctx.lineCap = 'butt';
+    // underside + sides
+    poly([proj(-3, 0, PIER), proj(3, 0, PIER), proj(3, -0.35, PIER), proj(-3, -0.35, PIER)], wood([92, 64, 44]));
+    poly([proj(-3, 0, zn), proj(-3, 0, PIER), proj(-3, -0.35, PIER), proj(-3, -0.35, zn)], wood([96, 66, 44]));
+    poly([proj(3, 0, zn), proj(3, 0, PIER), proj(3, -0.35, PIER), proj(3, -0.35, zn)], wood([96, 66, 44]));
+    // deck
+    const a = proj(-3, 0, zn), b = proj(3, 0, zn), c = proj(3, 0, PIER), d = proj(-3, 0, PIER);
+    if (a && b && c && d) {
+      const dg = ctx.createLinearGradient(0, d.y, 0, Math.min(a.y, H * 3));
+      dg.addColorStop(0, wood([196, 160, 118])); dg.addColorStop(1, wood([150, 108, 74]));
+      poly([a, b, c, d], dg);
+    }
+    // planks
+    ctx.lineWidth = 1;
+    const p0 = Math.ceil(zn / 0.42);
+    for (let n = p0; n * 0.42 < Math.min(PIER, S.camZ + 48); n++) {
+      const z = n * 0.42, l = proj(-3, 0, z), r = proj(3, 0, z);
+      if (!l) continue;
+      ctx.strokeStyle = `rgba(70,42,24,${(0.4 * (1 - (z - S.camZ) / 50)).toFixed(3)})`;
+      ctx.beginPath(); ctx.moveTo(l.x, l.y); ctx.lineTo(r.x, r.y); ctx.stroke();
+    }
+    // warm path of light down the middle at dusk
+    if (k > 0.2) {
+      const m1 = proj(-1.2, 0.001, zn), m2 = proj(1.2, 0.001, zn), m3 = proj(0.4, 0.001, PIER), m4 = proj(-0.4, 0.001, PIER);
+      poly([m1, m2, m3, m4], `rgba(255,190,120,${(0.08 * (k - 0.2)).toFixed(3)})`);
+    }
+    // posts, rails, lights (far to near)
+    const first = Math.ceil(zn / 4) * 4;
+    for (const side of [-1, 1]) {
+      const x = side * 3.05;
+      let prevTop = null, prevMid = null, prevPole = null;
+      for (let z = PIER; z >= first - 4; z -= 4) {
+        const zc = Math.max(z, zn);
+        const base = proj(x, WATER, zc), top = proj(x, 1.05, zc), mid = proj(x, 0.55, zc);
+        if (!base || !top) continue;
+        const w = Math.max(1.2, 0.14 * top.s);
+        if (z >= zn) {
+          ctx.fillStyle = wood([70, 48, 34]);
+          ctx.fillRect(base.x - w / 2, top.y, w, base.y - top.y);
+        }
+        ctx.strokeStyle = wood([84, 58, 40]);
+        ctx.lineWidth = clamp(0.06 * top.s, 1, 16);
+        if (prevTop) { ctx.beginPath(); ctx.moveTo(prevTop.x, prevTop.y); ctx.lineTo(top.x, top.y); ctx.stroke(); }
+        ctx.lineWidth = clamp(0.04 * mid.s, 1, 11);
+        if (prevMid) { ctx.beginPath(); ctx.moveTo(prevMid.x, prevMid.y); ctx.lineTo(mid.x, mid.y); ctx.stroke(); }
+        prevTop = top; prevMid = mid;
+        if (z % 12 === 0 && z >= zn) {
+          const pt = proj(x, 2.55, zc);
+          ctx.strokeStyle = wood([50, 36, 28]); ctx.lineWidth = Math.max(1, 0.07 * pt.s);
+          ctx.beginPath(); ctx.moveTo(top.x, top.y); ctx.lineTo(pt.x, pt.y); ctx.stroke();
+          if (prevPole !== null) drawLights(x, z, prevPole, k, t);
+          prevPole = z;
+        }
+      }
+    }
+    // end rail across the pier
+    const e1 = proj(-3.05, 1.05, PIER), e2 = proj(3.05, 1.05, PIER), e3 = proj(-3.05, 0.55, PIER), e4 = proj(3.05, 0.55, PIER);
+    if (e1 && e2) {
+      ctx.strokeStyle = wood([84, 58, 40]);
+      ctx.lineWidth = Math.max(1, 0.06 * e1.s); ctx.beginPath(); ctx.moveTo(e1.x, e1.y); ctx.lineTo(e2.x, e2.y); ctx.stroke();
+      ctx.lineWidth = Math.max(1, 0.04 * e3.s); ctx.beginPath(); ctx.moveTo(e3.x, e3.y); ctx.lineTo(e4.x, e4.y); ctx.stroke();
+    }
+  }
+
+  function drawLights(x, z0, z1, k, t) {
+    const pts = [];
+    for (let j = 0; j <= 12; j++) {
+      const tt = j / 12, z = lerp(z0, z1, tt);
+      if (z <= S.camZ + 0.3) continue;
+      pts.push({ p: proj(x, 2.55 - 0.42 * 4 * tt * (1 - tt), z), j });
+    }
+    if (pts.length < 2) return;
+    ctx.strokeStyle = 'rgba(30,24,20,.6)'; ctx.lineWidth = 1;
+    ctx.beginPath(); pts.forEach(({ p }, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y))); ctx.stroke();
+    ctx.globalCompositeOperation = 'lighter';
+    const glow = 0.35 + k * 0.65;
+    pts.forEach(({ p, j }) => {
+      if (j % 2 === 0) return;
+      const r = clamp(0.05 * p.s, 1.2, 9);
+      const fl = 0.85 + 0.15 * Math.sin(t * 3 + j + z0);
+      ctx.fillStyle = `rgba(255,186,105,${(0.13 * glow * fl).toFixed(3)})`;
+      ctx.beginPath(); ctx.arc(p.x, p.y + r, r * 6, 0, 6.283); ctx.fill();
+      ctx.fillStyle = `rgba(255,222,160,${(0.95 * glow).toFixed(3)})`;
+      ctx.beginPath(); ctx.arc(p.x, p.y + r, r, 0, 6.283); ctx.fill();
+    });
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function drawUnder(t, dt, w) {
+    const yw = lerp(H + 40, -70, w);
+    const wave = (x) => yw + Math.sin(x * 0.018 + t * 2.1) * 7 + Math.sin(x * 0.007 - t * 1.3) * 5;
+    ctx.save();
+    ctx.beginPath(); ctx.moveTo(0, H + 2); ctx.lineTo(-2, wave(0));
+    for (let x = 0; x <= W + 20; x += 16) ctx.lineTo(x, wave(x));
+    ctx.lineTo(W + 2, H + 2); ctx.closePath(); ctx.clip();
+
+    const g = ctx.createLinearGradient(0, Math.max(yw, -70), 0, H);
+    g.addColorStop(0, '#2c9fb6'); g.addColorStop(0.35, '#0f6283'); g.addColorStop(1, '#05263c');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+    // light rays
+    ctx.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < 7; i++) {
+      const x0 = W * (0.06 + i * 0.15) + Math.sin(t * 0.3 + i * 1.9) * 40;
+      const a = 0.05 + 0.04 * Math.sin(t * 0.7 + i * 2.3);
+      const rg = ctx.createLinearGradient(0, yw, 0, H);
+      rg.addColorStop(0, `rgba(190,245,255,${a.toFixed(3)})`); rg.addColorStop(1, 'rgba(190,245,255,0)');
+      ctx.fillStyle = rg;
+      ctx.beginPath(); ctx.moveTo(x0 - 14, yw); ctx.lineTo(x0 + 14, yw); ctx.lineTo(x0 + 140, H); ctx.lineTo(x0 + 40, H); ctx.closePath(); ctx.fill();
+    }
+    // caustics under the surface
+    ctx.strokeStyle = 'rgba(210,250,255,.10)'; ctx.lineWidth = 1.5;
+    for (let r = 0; r < 5; r++) {
+      const y0 = Math.max(yw, 0) + 14 + r * 16;
+      ctx.beginPath();
+      for (let x = 0; x <= W; x += 18) ctx.lineTo(x, y0 + Math.sin(x * 0.03 + t * 2 + r * 1.7) * 5);
+      ctx.stroke();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+
+    // pier pilings
+    [[-0.36, 1, 0.55], [0.36, 1, 0.55], [-0.17, 0.5, 0.3], [0.17, 0.5, 0.3], [-0.08, 0.28, 0.18], [0.08, 0.28, 0.18]].forEach(([fx, s, a]) => {
+      const x = W / 2 + fx * W - camX * 30 * s, wd = 26 * s;
+      const pg = ctx.createLinearGradient(0, yw, 0, H);
+      pg.addColorStop(0, `rgba(10,30,40,${a})`); pg.addColorStop(1, `rgba(4,20,30,${a * 0.4})`);
+      ctx.fillStyle = pg; ctx.fillRect(x - wd / 2, yw, wd, H - yw);
+    });
+
+    // fish school
+    const cx = W * 0.5 + Math.sin(t * 0.28) * W * 0.3, cy = H * 0.6 + Math.sin(t * 0.45) * H * 0.14;
+    const dir = Math.cos(t * 0.28) >= 0 ? 1 : -1;
+    ctx.fillStyle = 'rgba(205,232,240,.62)';
+    fish.forEach((f) => {
+      let x = cx + f.ox + Math.sin(t * 1.4 + f.ph) * 10, y = cy + f.oy + Math.cos(t * 1.1 + f.ph) * 6;
+      if (pointerSeen) {
+        const dx = x + f.px - mx, dy = y + f.py - my, d = Math.hypot(dx, dy);
+        if (d < 130 && d > 0) { f.px += (dx / d) * (130 - d) * 0.08; f.py += (dy / d) * (130 - d) * 0.08; }
+      }
+      f.px *= 0.96; f.py *= 0.96;
+      x += f.px; y += f.py;
+      if (y < yw + 10) return;
+      const L = 11 * f.sz, tail = Math.sin(t * 9 + f.ph) * 3;
+      ctx.beginPath(); ctx.ellipse(x, y, L, L * 0.34, 0, 0, 6.283); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x - dir * L * 0.9, y); ctx.lineTo(x - dir * L * 1.6, y - L * 0.4 + tail); ctx.lineTo(x - dir * L * 1.6, y + L * 0.4 + tail); ctx.closePath(); ctx.fill();
+    });
+
+    // bubbles
+    if (Math.random() < dt * 9 * w) addBubble(Math.random() * W, H + 10, 1.5 + Math.random() * 4);
+    if (pointerSeen && w > 0.6 && t - lastBubble > 0.05 && Math.hypot(tmx - mx, tmy - my) > 2) { lastBubble = t; addBubble(mx + (Math.random() - 0.5) * 16, my, 1.5 + Math.random() * 3); }
+    ctx.strokeStyle = 'rgba(225,250,255,.55)'; ctx.lineWidth = 1;
+    bubbles = bubbles.filter((b) => {
+      b.y -= b.v * dt; b.x += Math.sin(t * 3 + b.ph) * 0.4;
+      ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 6.283); ctx.stroke();
+      return b.y > yw - 4;
+    });
+    ctx.restore();
+
+    // surface line
+    if (yw > -60) {
+      ctx.strokeStyle = 'rgba(235,252,255,.75)'; ctx.lineWidth = 2;
+      ctx.beginPath(); for (let x = 0; x <= W + 20; x += 16) x ? ctx.lineTo(x, wave(x)) : ctx.moveTo(x, wave(x)); ctx.stroke();
+    }
+  }
+
+  /* ---------- HUD ---------- */
+  const hLbl = $('#hLbl'), hVal = $('#hVal'), hRow = $('#hRow');
+  let hudKey = '', curIdx = -1;
+  const clock = (mins) => `${Math.floor(mins / 60)} h ${String(Math.floor(mins % 60)).padStart(2, '0')}`;
+  function hud() {
+    let l, v, r;
+    if (S.p < 0.35) { l = 'Devant le restaurant'; v = 'Ponton n° 7'; r = 'Ouvert ce soir, 19 h – 22 h 30'; }
+    else if (S.water < 0.5) { l = 'Sur le ponton'; v = `${Math.round(Math.min(S.camZ, 100) * 1.2)} m / 120 m`; r = `Il est ${clock(19 * 60 + 30 + S.sunset * 104)} · coucher à 21 h 14`; }
+    else { l = 'Sous l\'eau'; v = `−${(S.water * 2.4).toFixed(1).replace('.', ',')} m`; r = 'Eau à 22 °C · visibilité 15 m'; }
+    const key = l + v + r;
+    if (key !== hudKey) { hudKey = key; hLbl.textContent = l; hVal.textContent = v; hRow.textContent = r; }
+    const idx = Math.round(S.p);
+    if (idx !== curIdx) { curIdx = idx; navBtns.forEach((b, j) => b.classList.toggle('cur', j === idx)); }
+  }
+
+  /* ---------- form ---------- */
+  const dateEl = $('#r-date');
+  const tomorrow = new Date(Date.now() + 864e5);
+  dateEl.value = tomorrow.toISOString().slice(0, 10);
+  dateEl.min = new Date().toISOString().slice(0, 10);
+  $('#form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const ok = $('#ok'), name = $('#r-name').value.trim();
+    if (!name) { ok.hidden = false; ok.textContent = 'Indiquez un nom pour la réservation.'; $('#r-name').focus(); return; }
+    const d = dateEl.value ? new Date(dateEl.value + 'T12:00:00') : tomorrow;
+    const when = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+    const n = +$('#r-guests').value;
+    ok.hidden = false;
+    ok.textContent = `C'est noté, ${name} : ${n} couvert${n > 1 ? 's' : ''} le ${when} à ${$('#r-time').value}${$('#r-end').checked ? ', en bout de ponton' : ''}. (Démo : rien n'a été envoyé.)`;
+  });
+
+  /* ---------- frame ---------- */
+  let last = performance.now(), t = 0;
+  function frame(now) {
+    const dt = Math.min(0.05, Math.max(0, (now - last) / 1000)); last = now; t += dt;
+    const k = reduce ? 1 : 1 - Math.pow(0.006, dt);
+    q += (target - q) * k;
+    if (Math.abs(target - q) < 0.0004) q = target;
+    const mk = 1 - Math.pow(0.002, dt);
+    mx += (tmx - mx) * mk; my += (tmy - my) * mk;
+    camX = reduce || !pointerSeen ? 0 : (mx / W - 0.5) * 0.5;
+
+    computeState(reduce ? Math.round(q) : q);
+    placeFacade(reduce || !pointerSeen ? 0 : -(mx / W - 0.5) * 24);
+
+    if (S.water < 1) drawAbove(t, S.sunset);
+    if (S.water > 0) drawUnder(t, dt, S.water);
+
+    placeBoards();
+    placePanels();
+    hud();
+    requestAnimationFrame(frame);
+  }
+
+  layout();
+  requestAnimationFrame((n) => { last = n; frame(n); });
+})();
+</script>
+
+</body>
+</html>
