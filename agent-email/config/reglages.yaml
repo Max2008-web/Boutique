@@ -1,0 +1,48 @@
+# =================================================================
+# RÉGLAGES DE L'AGENT
+# =================================================================
+
+# Mode de fonctionnement :
+#   test        : n'envoie rien, n'écrit rien dans Gmail ; journalise seulement
+#                 ce qu'il aurait fait (dry-run). Mode recommandé pour démarrer.
+#   approbation : crée un brouillon Gmail pour chaque réponse et attend que
+#                 le responsable le valide (en l'envoyant depuis Gmail).
+#   autonome    : envoie seul les réponses aux questions courantes au-dessus
+#                 du seuil ; devis, remises et réclamations restent TOUJOURS
+#                 en validation.
+mode: test
+
+# Score de confiance minimal (0 à 1) pour qu'une réponse puisse partir
+# sans validation humaine (mode autonome uniquement).
+seuil_confiance: 0.85
+
+# Fréquence de relève de la boîte (en minutes).
+intervalle_minutes: 5
+
+# Au tout premier lancement, ancienneté maximale des mails traités (en jours).
+premiere_releve_jours: 1
+
+fuseau_horaire: "Europe/Paris"
+
+# Personne qui reçoit les remontées, les confirmations et le résumé quotidien.
+responsable:
+  nom: "Claire Durand"
+  email: "claire.durand@cabinet-durand.example"
+
+notifications:
+  # Envoie au responsable une confirmation à CHAQUE réponse envoyée
+  # automatiquement par l'agent (destinataire, objet, extrait, score).
+  confirmation_envoi: true
+  # Signale aussi dans un mail chaque brouillon créé en attente de validation.
+  alerte_brouillon: false
+
+resume_quotidien:
+  actif: true
+  heure: "18:00"
+
+# Préfixe des libellés Gmail créés par l'agent (ex. "Agent/À valider").
+prefixe_libelles: "Agent"
+
+# Expéditeurs ou domaines auxquels l'agent ne répond jamais.
+expediteurs_ignores:
+  - "@cabinet-durand.example"   # mails internes

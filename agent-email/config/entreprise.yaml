@@ -1,0 +1,83 @@
+# =================================================================
+# BASE DE CONNAISSANCES DE L'ENTREPRISE
+# -----------------------------------------------------------------
+# L'agent répond aux questions courantes UNIQUEMENT à partir de ce
+# fichier. Tout ce qui n'y figure pas => transmis à un humain.
+# Entreprise FICTIVE de démonstration.
+# =================================================================
+
+entreprise:
+  nom: "Cabinet Durand & Associés"
+  activite: "Cabinet d'expertise comptable"
+  adresse: "12 rue des Lilas, 69003 Lyon"
+  telephone: "04 78 00 00 00"
+  email: "contact@cabinet-durand.example"
+  site_web: "https://www.cabinet-durand.example"
+  siret: "000 000 000 00000"   # fictif
+  inscription: "Inscrit au tableau de l'Ordre des experts-comptables (région Auvergne-Rhône-Alpes)"
+
+signature: |
+  Bien cordialement,
+
+  L'équipe du Cabinet Durand & Associés
+  12 rue des Lilas, 69003 Lyon
+  04 78 00 00 00 · www.cabinet-durand.example
+
+horaires:
+  lundi: "9h00 - 12h30 / 14h00 - 18h00"
+  mardi: "9h00 - 12h30 / 14h00 - 18h00"
+  mercredi: "9h00 - 12h30 / 14h00 - 18h00"
+  jeudi: "9h00 - 12h30 / 14h00 - 18h00"
+  vendredi: "9h00 - 12h30 / 14h00 - 17h00"
+  samedi: "Fermé"
+  dimanche: "Fermé"
+  remarques: "Fermeture annuelle du 5 au 18 août. Rendez-vous possibles en visioconférence."
+
+services:
+  - id: tenue_comptable
+    nom: "Tenue de comptabilité"
+    description: "Saisie des pièces, rapprochements bancaires, suivi de trésorerie."
+  - id: bilan_annuel
+    nom: "Bilan et comptes annuels"
+    description: "Établissement du bilan, du compte de résultat, de la liasse fiscale et dépôt des comptes."
+  - id: declarations_fiscales
+    nom: "Déclarations fiscales"
+    description: "TVA, CFE, impôt sur les sociétés, déclaration de revenus des dirigeants."
+  - id: social_paie
+    nom: "Social et paie"
+    description: "Bulletins de paie, déclarations sociales (DSN), contrats de travail simples."
+  - id: creation_entreprise
+    nom: "Création d'entreprise"
+    description: "Choix du statut, prévisionnel, formalités d'immatriculation."
+  - id: conseil_gestion
+    nom: "Conseil et gestion"
+    description: "Tableaux de bord, rendez-vous de pilotage, optimisation de la rémunération du dirigeant."
+
+faq:
+  - id: rendez_vous
+    question: "Comment prendre rendez-vous ?"
+    reponse: "Par téléphone au 04 78 00 00 00 aux heures d'ouverture, ou en répondant à ce mail avec vos disponibilités. Les rendez-vous peuvent se faire au cabinet ou en visioconférence."
+  - id: premier_rdv
+    question: "Le premier rendez-vous est-il payant ?"
+    reponse: "Non, le premier rendez-vous de découverte (45 minutes) est gratuit et sans engagement."
+  - id: documents_creation
+    question: "Quels documents fournir pour une création d'entreprise ?"
+    reponse: "Une pièce d'identité du ou des dirigeants, un justificatif de domicile, une attestation de dépôt des fonds si société, et une description de votre projet."
+  - id: transmission_pieces
+    question: "Comment transmettre mes pièces comptables ?"
+    reponse: "Via votre espace client en ligne (identifiants envoyés à l'ouverture du dossier), ou par mail à contact@cabinet-durand.example. Les originaux papier peuvent être déposés au cabinet."
+  - id: zone_intervention
+    question: "Travaillez-vous avec des clients hors de Lyon ?"
+    reponse: "Oui, nous accompagnons des clients dans toute la France grâce aux échanges dématérialisés et à la visioconférence."
+  - id: types_clients
+    question: "Quels types de clients accompagnez-vous ?"
+    reponse: "Auto-entrepreneurs, TPE, PME jusqu'à 50 salariés, professions libérales, SCI et associations."
+  - id: changement_comptable
+    question: "Comment changer d'expert-comptable ?"
+    reponse: "C'est simple : nous prenons contact avec votre ancien cabinet pour récupérer votre dossier, dans le respect des règles de la profession. Vous n'avez qu'à nous donner votre accord écrit."
+  - id: paiement
+    question: "Quels moyens de paiement acceptez-vous ?"
+    reponse: "Prélèvement mensuel (privilégié) ou virement bancaire."
+  - id: espace_client
+    question: "J'ai perdu mes identifiants d'espace client."
+    reponse: "Utilisez le lien « Mot de passe oublié » de la page de connexion. Si le problème persiste, appelez le cabinet au 04 78 00 00 00."

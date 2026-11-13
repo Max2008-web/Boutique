@@ -1,0 +1,78 @@
+# =================================================================
+# CATALOGUE DES OFFRES ET TARIFS
+# -----------------------------------------------------------------
+# L'agent prépare des devis UNIQUEMENT à partir de ce fichier.
+# Les montants sont calculés par le programme (jamais par l'IA).
+# Tout montant cité dans une réponse doit exister ici, sinon
+# l'envoi est bloqué.
+# Tarifs FICTIFS de démonstration.
+# =================================================================
+
+devise: "EUR"
+tva_pourcentage: 20          # TVA appliquée sur les prix HT
+validite_devis_jours: 30     # durée de validité d'un devis
+
+produits:
+  - id: pack_auto_entrepreneur
+    nom: "Pack Auto-entrepreneur"
+    description: "Tenue simplifiée, déclarations URSSAF, assistance par mail."
+    prix_ht: 69
+    unite: "mois"
+    delai: "Mise en place sous 5 jours ouvrés"
+  - id: pack_tpe
+    nom: "Pack TPE"
+    description: "Tenue comptable, TVA, bilan annuel et liasse fiscale pour une société jusqu'à 300 000 EUR de chiffre d'affaires."
+    prix_ht: 190
+    unite: "mois"
+    delai: "Mise en place sous 10 jours ouvrés"
+  - id: pack_pme
+    nom: "Pack PME"
+    description: "Pack TPE + tableaux de bord trimestriels et rendez-vous de pilotage, jusqu'à 2 000 000 EUR de chiffre d'affaires."
+    prix_ht: 450
+    unite: "mois"
+    delai: "Mise en place sous 15 jours ouvrés"
+  - id: bulletin_paie
+    nom: "Bulletin de paie"
+    description: "Établissement d'un bulletin de paie et des déclarations sociales associées."
+    prix_ht: 35
+    unite: "bulletin"
+    delai: "Traitement mensuel"
+  - id: creation_societe
+    nom: "Création de société"
+    description: "Choix du statut, rédaction des statuts types, formalités d'immatriculation (frais de greffe en sus)."
+    prix_ht: 690
+    unite: "forfait"
+    delai: "Dossier déposé sous 10 jours ouvrés après réception des pièces"
+  - id: bilan_seul
+    nom: "Bilan annuel seul"
+    description: "Établissement des comptes annuels et de la liasse fiscale, sans tenue comptable."
+    prix_ht: 1200
+    unite: "forfait"
+    delai: "Remis sous 30 jours après réception de la comptabilité complète"
+  - id: declaration_revenus
+    nom: "Déclaration de revenus du dirigeant"
+    description: "Préparation et télédéclaration de la déclaration de revenus personnelle."
+    prix_ht: 150
+    unite: "forfait"
+    delai: "Avant la date limite officielle si pièces reçues 15 jours avant"
+
+# Remises que l'agent a le droit d'appliquer de lui-même dans un devis.
+# Au-delà de "remise_max_pourcentage", ou pour toute remise non listée,
+# le devis part obligatoirement en validation humaine.
+remises:
+  remise_max_pourcentage: 10
+  autorisees:
+    - id: engagement_annuel
+      libelle: "Engagement annuel payé en une fois"
+      pourcentage: 5
+      condition: "Paiement annuel d'avance des forfaits mensuels."
+    - id: parrainage
+      libelle: "Client parrainé"
+      pourcentage: 10
+      condition: "Le prospect est recommandé par un client existant du cabinet (à vérifier par un humain)."
+
+conditions:
+  paiement: "Prélèvement mensuel le 5 de chaque mois, ou virement à 30 jours pour les forfaits."
+  engagement: "Engagement de 12 mois pour les packs mensuels, renouvelable par tacite reconduction."
+  resiliation: "Résiliation possible à chaque échéance annuelle avec un préavis de 3 mois."
+  mentions: "Devis indicatif établi sur la base des informations transmises. Une lettre de mission sera signée avant le début de la prestation."
